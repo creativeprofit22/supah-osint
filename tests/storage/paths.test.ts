@@ -18,6 +18,8 @@ test("macOS keeps it under Application Support", () => {
 });
 
 test("Linux follows XDG_DATA_HOME, falling back to ~/.local/share", () => {
-  expect(defaultDatabasePath({ XDG_DATA_HOME: "/data" }, "linux", "/home/ada")).toBe("/data/supah-osint/supah-osint.db");
+  expect(defaultDatabasePath({ XDG_DATA_HOME: "/data" }, "linux", "/home/ada")).toBe(
+    "/data/supah-osint/supah-osint.db",
+  );
   expect(defaultDatabasePath({}, "linux", "/home/ada")).toBe("/home/ada/.local/share/supah-osint/supah-osint.db");
 });

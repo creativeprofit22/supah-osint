@@ -68,7 +68,11 @@ test("a key from the keychain never reaches the SQLite file", async () => {
         return Promise.reject(new Error(`GET https://api.example.com/?key=${ctx.key} failed`));
       }
       return [
-        finding("leaky", { url: `https://api.example.com/?key=${ctx.key}`, result: "inconclusive", reason: `used ${ctx.key}` }),
+        finding("leaky", {
+          url: `https://api.example.com/?key=${ctx.key}`,
+          result: "inconclusive",
+          reason: `used ${ctx.key}`,
+        }),
         finding("leaky", { url: "https://example.com/props", entities: [account("github", key)] }),
       ];
     },
@@ -103,7 +107,10 @@ test("keys over the keychain size limit fail clearly and keep the old keys", asy
   await keys.set("big", ["old-key"]);
   // "é" is 2 bytes in UTF-8, so this is under the limit in characters but over it in bytes.
   for (const tooBig of [["fake-test-token-42" + "a".repeat(MAX_ENTRY_BYTES)], ["é".repeat(MAX_ENTRY_BYTES / 2)]]) {
-    const error = await keys.set("big", tooBig).then(() => null, (e: unknown) => e as Error);
+    const error = await keys.set("big", tooBig).then(
+      () => null,
+      (e: unknown) => e as Error,
+    );
     expect(error?.message).toBe(`too many or too long keys for big (limit ${MAX_ENTRY_BYTES} bytes)`);
     expect(error?.message).not.toContain("fake-test-token-42");
   }

@@ -1,4 +1,13 @@
-import { createEntity, createRelation, entityId, type Audit, type Entity, type EntityType, type Finding, type RelationLabel } from "../../packages/core/src/index.ts";
+import {
+  createEntity,
+  createRelation,
+  entityId,
+  type Audit,
+  type Entity,
+  type EntityType,
+  type Finding,
+  type RelationLabel,
+} from "../../packages/core/src/index.ts";
 import type { Http, KeyRequirement, Source, SourceContext } from "../../packages/engine/src/index.ts";
 
 export const audit: Audit = { id: "audit-1", subjectName: "Ada Lovelace" };

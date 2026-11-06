@@ -12,11 +12,14 @@
     "dev": "bun run --cwd apps/desktop dev",
     "typecheck": "bun run --cwd apps/desktop devkit && tsc -p tsconfig.json && tsc -p apps/desktop/tsconfig.json",
     "lint": "oxlint --deny-warnings",
+    "format": "biome format --write",
+    "format:check": "biome format",
     "test": "bun test",
     "boundaries": "depcruise packages apps features --config .dependency-cruiser.cjs",
-    "check": "bun run typecheck && bun run lint && bun test && bun run boundaries"
+    "check": "bun run typecheck && bun run format:check && bun run lint && bun test && bun run boundaries"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.5",
     "@swc/core": "1.16.21",
     "@types/bun": "1.4.4",
     "dependency-cruiser": "18.7.2",

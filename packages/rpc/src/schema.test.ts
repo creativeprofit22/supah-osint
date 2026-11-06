@@ -27,11 +27,34 @@ function fakeSources(rows: SourceHealthRow[] = []) {
     auditDomain: async (subjectName, domain) => {
       calls.audited.push({ subjectName, domain });
       // Extra fields stand in for the full core types; they must not cross to the window.
-      const finding = { source: "dns", url: "https://dns.google/x", result: "inconclusive", reason: "SERVFAIL", entities: [] } as const;
-      const entity = { id: "a1|Domain|example.org", type: "Domain", label: "example.org", props: { name: "example.org" } };
-      const relation = { from: "a1|Domain|mx.example.org", label: "subdomain_of", to: "a1|Domain|example.org", auditId: "a1" };
+      const finding = {
+        source: "dns",
+        url: "https://dns.google/x",
+        result: "inconclusive",
+        reason: "SERVFAIL",
+        entities: [],
+      } as const;
+      const entity = {
+        id: "a1|Domain|example.org",
+        type: "Domain",
+        label: "example.org",
+        props: { name: "example.org" },
+      };
+      const relation = {
+        from: "a1|Domain|mx.example.org",
+        label: "subdomain_of",
+        to: "a1|Domain|example.org",
+        auditId: "a1",
+      };
       const skipped = { sourceId: "crtsh", reason: "parked", entityId: "a1|Domain|example.org" };
-      return { auditId: "a1", status: "cancelled", findings: [finding], entities: [entity], relations: [relation], skipped: [skipped] };
+      return {
+        auditId: "a1",
+        status: "cancelled",
+        findings: [finding],
+        entities: [entity],
+        relations: [relation],
+        skipped: [skipped],
+      };
     },
   };
   return { sources, audits, calls };
@@ -86,7 +109,9 @@ test("bunHandlers rejects a bad sourceId", async () => {
   const { call, calls } = setup();
   for (const params of [{ sourceId: "" }, { sourceId: "   " }, { sourceId: 7 }, {}, undefined]) {
     await expect(Promise.resolve().then(() => call("reviveSource", params))).rejects.toThrow("sourceId");
-    await expect(Promise.resolve().then(() => call("setSourceKeys", { ...params, keys: ["k"] }))).rejects.toThrow("sourceId");
+    await expect(Promise.resolve().then(() => call("setSourceKeys", { ...params, keys: ["k"] }))).rejects.toThrow(
+      "sourceId",
+    );
   }
   expect(calls.revived).toEqual([]);
   expect(calls.saved).toEqual([]);
@@ -121,9 +146,16 @@ test("auditDomain round-trips plain rows only", async () => {
 
 test("bunHandlers rejects an empty subject name or domain", async () => {
   const { call, calls } = setup();
-  const bad = [{ subjectName: "Ada" }, { subjectName: " ", domain: "example.org" }, { subjectName: "Ada", domain: 3 }, undefined];
+  const bad = [
+    { subjectName: "Ada" },
+    { subjectName: " ", domain: "example.org" },
+    { subjectName: "Ada", domain: 3 },
+    undefined,
+  ];
   for (const params of bad) {
-    await expect(Promise.resolve().then(() => call("auditDomain", params))).rejects.toThrow("must be a non-empty string");
+    await expect(Promise.resolve().then(() => call("auditDomain", params))).rejects.toThrow(
+      "must be a non-empty string",
+    );
   }
   expect(calls.audited).toEqual([]);
 });

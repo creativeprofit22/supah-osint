@@ -63,5 +63,8 @@ export async function runSource(source: Source, input: EntityOf<"Domain">, http:
 }
 
 export function keysOf(finding: Finding | undefined, type: string): string[] {
-  return (finding?.entities ?? []).filter((entity) => entity.type === type).map((entity) => entity.key).sort();
+  return (finding?.entities ?? [])
+    .filter((entity) => entity.type === type)
+    .map((entity) => entity.key)
+    .sort();
 }

@@ -5,10 +5,7 @@ export type RecordType = "SOA" | "MX" | "NS" | "TXT";
 
 const TYPE_CODES: Record<RecordType, number> = { SOA: 6, MX: 15, NS: 2, TXT: 16 };
 
-export type DnsAnswer =
-  | { kind: "records"; data: string[] }
-  | { kind: "none" }
-  | { kind: "failed"; reason: string };
+export type DnsAnswer = { kind: "records"; data: string[] } | { kind: "none" } | { kind: "failed"; reason: string };
 
 export type Extracted = { entities: Entity[]; relations: Relation[] };
 
@@ -27,7 +24,9 @@ export function readAnswer(body: string, type: RecordType): DnsAnswer {
   if (status === 3) return { kind: "none" };
   if (status !== 0) return { kind: "failed", reason: `DNS lookup failed (${rcodeName(status)})` };
   const data = (Array.isArray(answer) ? answer : [])
-    .filter((row): row is { type: number; data: string } => typeof row?.data === "string" && row.type === TYPE_CODES[type])
+    .filter(
+      (row): row is { type: number; data: string } => typeof row?.data === "string" && row.type === TYPE_CODES[type],
+    )
     .map((row) => row.data);
   return data.length > 0 ? { kind: "records", data } : { kind: "none" };
 }

@@ -182,7 +182,11 @@ test("a fractional source limit below one is kept as one call per longer window 
   const clock = createFakeClock();
   const guard = createSourceGuard({ clock, defaultRateLimit: { requests: 10, perMs: 1000 } });
   const slow = scripted(clock, [200]);
-  const wrapped = guard.http(source("slow", { rateLimit: { requests: 0.5, perMs: 1000 } }), slow.http, new AbortController().signal);
+  const wrapped = guard.http(
+    source("slow", { rateLimit: { requests: 0.5, perMs: 1000 } }),
+    slow.http,
+    new AbortController().signal,
+  );
   await wrapped.get("https://a.test/1");
   await wrapped.get("https://a.test/2");
   expect(slow.calls.map((call) => call.at)).toEqual([0, 2000]);
@@ -192,7 +196,11 @@ test("a fractional source limit above one rounds down so it never allows more ca
   const clock = createFakeClock();
   const guard = createSourceGuard({ clock });
   const base = scripted(clock, [200]);
-  const wrapped = guard.http(source("odd", { rateLimit: { requests: 1.5, perMs: 1000 } }), base.http, new AbortController().signal);
+  const wrapped = guard.http(
+    source("odd", { rateLimit: { requests: 1.5, perMs: 1000 } }),
+    base.http,
+    new AbortController().signal,
+  );
   await wrapped.get("https://a.test/1");
   await wrapped.get("https://a.test/2");
   expect(base.calls.map((call) => call.at)).toEqual([0, 1000]);

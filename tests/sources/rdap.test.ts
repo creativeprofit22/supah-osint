@@ -23,7 +23,11 @@ test("follows the registry to the registrar and links the registrant organizatio
   const edges = finding?.relations.map((r) => `${r.from} ${r.label} ${r.to}`).sort();
   const org = "audit-1|Organization|electronic frontier foundation";
   const email = "audit-1|Email|whois@eff.org";
-  expect(edges).toEqual([`${entityId(eff)} registered_by ${email}`, `${entityId(eff)} registered_by ${org}`, `${org} has_email ${email}`]);
+  expect(edges).toEqual([
+    `${entityId(eff)} registered_by ${email}`,
+    `${entityId(eff)} registered_by ${org}`,
+    `${org} has_email ${email}`,
+  ]);
 });
 
 test("a record whose contacts are all redacted is not found", async () => {
@@ -48,24 +52,44 @@ test("an unregistered domain is not found", async () => {
 test("unknown TLDs, server errors and a failed registrar lookup are inconclusive", async () => {
   const bootstrap = { [RDAP_BOOTSTRAP_URL]: `${RDAP}/iana-bootstrap.json` };
   const unknown = await runSource(source, domain("example.zz"), fixtureHttp(bootstrap));
-  expect(unknown.map((f) => [f.result, f.reason])).toEqual([["inconclusive", "no RDAP server is listed for example.zz"]]);
+  expect(unknown.map((f) => [f.result, f.reason])).toEqual([
+    ["inconclusive", "no RDAP server is listed for example.zz"],
+  ]);
 
-  const down = await runSource(source, domain("eff.org"), fixtureHttp({ ...bootstrap, [`${PIR}eff.org`]: { file: `${RDAP}/not-found.json`, status: 503 } }));
+  const down = await runSource(
+    source,
+    domain("eff.org"),
+    fixtureHttp({ ...bootstrap, [`${PIR}eff.org`]: { file: `${RDAP}/not-found.json`, status: 503 } }),
+  );
   expect(down.map((f) => [f.result, f.reason])).toEqual([["inconclusive", "RDAP server answered HTTP 503"]]);
 
   const registrarDown = await runSource(
     source,
     domain("eff.org"),
-    fixtureHttp({ ...effRoutes, "https://rdap.gandi.net/domain/eff.org": { file: `${RDAP}/not-found.json`, status: 500 } }),
+    fixtureHttp({
+      ...effRoutes,
+      "https://rdap.gandi.net/domain/eff.org": { file: `${RDAP}/not-found.json`, status: 500 },
+    }),
   );
-  expect(registrarDown.map((f) => [f.result, f.reason])).toEqual([["inconclusive", "registrar RDAP answered HTTP 500"]]);
+  expect(registrarDown.map((f) => [f.result, f.reason])).toEqual([
+    ["inconclusive", "registrar RDAP answered HTTP 500"],
+  ]);
 
-  const garbled = await runSource(source, domain("eff.org"), fixtureHttp({ [RDAP_BOOTSTRAP_URL]: "packages/sources/crtsh/fixtures/malformed.json" }));
+  const garbled = await runSource(
+    source,
+    domain("eff.org"),
+    fixtureHttp({ [RDAP_BOOTSTRAP_URL]: "packages/sources/crtsh/fixtures/malformed.json" }),
+  );
   expect(garbled.map((f) => f.result)).toEqual(["inconclusive"]);
 });
 
 test("the longest bootstrap suffix wins", () => {
-  const bootstrap = { services: [[["uk"], ["https://a.example/"]], [["co.uk"], ["https://b.example"]]] };
+  const bootstrap = {
+    services: [
+      [["uk"], ["https://a.example/"]],
+      [["co.uk"], ["https://b.example"]],
+    ],
+  };
   expect(bootstrapBase(bootstrap, "shop.co.uk")).toBe("https://b.example/");
   expect(bootstrapBase(bootstrap, "bbc.uk")).toBe("https://a.example/");
 });

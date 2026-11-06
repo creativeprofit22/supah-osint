@@ -127,7 +127,10 @@ export function linkContacts(domain: EntityOf<"Domain">, contacts: readonly Cont
     const orgName = contact.org ?? (contact.kind === "org" ? contact.fn : null);
     const personName = contact.kind === "individual" ? contact.fn : null;
     const holders: Entity[] = [];
-    for (const [type, name] of [["Organization", orgName], ["Person", personName]] as const) {
+    for (const [type, name] of [
+      ["Organization", orgName],
+      ["Person", personName],
+    ] as const) {
       if (!name) continue;
       const holder = createEntity(domain.auditId, type, { name });
       if (!holder.ok) continue;

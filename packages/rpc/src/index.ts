@@ -81,7 +81,11 @@ export function createRpc(
         auditId: audit.id,
         status: run.status,
         findings,
-        entities: entities.map((entity) => ({ ...entity, id: entityId(entity), label: Object.values(entity.props).join(" · ") })),
+        entities: entities.map((entity) => ({
+          ...entity,
+          id: entityId(entity),
+          label: Object.values(entity.props).join(" · "),
+        })),
         relations,
         skipped: run.skipped.map(({ sourceId, reason }) => ({ sourceId, reason })),
       };
@@ -110,5 +114,8 @@ export function openStoredRpc(
 ): Rpc & { close(): void } {
   const { databasePath, sources = domainSources(), ...rest } = deps;
   const store = openSqliteStore(databasePath);
-  return { ...createRpc({ ...rest, sources, keys: rest.keys ?? createKeychainKeys(), store }), close: () => store.close() };
+  return {
+    ...createRpc({ ...rest, sources, keys: rest.keys ?? createKeychainKeys(), store }),
+    close: () => store.close(),
+  };
 }

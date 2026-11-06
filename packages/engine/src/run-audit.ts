@@ -50,7 +50,10 @@ export async function runAudit(deps: EngineDeps, options: RunAuditOptions): Prom
   for (const source of deps.sources) {
     if (keys.has(source.id)) continue;
     // Empty keys would match (and redact) everything.
-    keys.set(source.id, [...new Set(await loadKeys(deps, source.id))].filter((key) => key !== ""));
+    keys.set(
+      source.id,
+      [...new Set(await loadKeys(deps, source.id))].filter((key) => key !== ""),
+    );
   }
 
   const controller = new AbortController();
@@ -134,7 +137,10 @@ function extendScope(findings: readonly Finding[], inScope: Map<EntityId, number
   while (changed) {
     changed = false;
     for (const relation of relations) {
-      for (const [known, other] of [[relation.from, relation.to], [relation.to, relation.from]] as const) {
+      for (const [known, other] of [
+        [relation.from, relation.to],
+        [relation.to, relation.from],
+      ] as const) {
         const entity = byId.get(other);
         if (!inScope.has(known) || inScope.has(other) || !entity) continue;
         inScope.set(other, depth);
@@ -185,7 +191,13 @@ async function runLookup(
 function isTrusted(value: unknown, sourceId: string, auditId: string): value is Finding {
   try {
     const finding = value as Finding;
-    return typeof value === "object" && value !== null && finding.auditId === auditId && finding.source === sourceId && createFinding(finding).ok;
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      finding.auditId === auditId &&
+      finding.source === sourceId &&
+      createFinding(finding).ok
+    );
   } catch {
     return false;
   }

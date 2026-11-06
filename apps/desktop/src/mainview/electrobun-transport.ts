@@ -1,5 +1,12 @@
 // Adapter from Electrobun's view RPC to RpcTransport; features only ever see AppClient.
-import { AUDIT_REQUEST_LIMIT_MS, type AppSchema, type ParamsOf, type RequestName, type ResponseOf, type RpcTransport } from "@supah-osint/rpc/schema";
+import {
+  AUDIT_REQUEST_LIMIT_MS,
+  type AppSchema,
+  type ParamsOf,
+  type RequestName,
+  type ResponseOf,
+  type RpcTransport,
+} from "@supah-osint/rpc/schema";
 
 export async function createElectrobunTransport(): Promise<RpcTransport> {
   // electrobun/view reads these once at load; without them it uses the native bridge instead of a loopback WebSocket.

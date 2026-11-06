@@ -1,5 +1,13 @@
 // Ring 3 (adapter): in-memory Store for tests. Follows the same rules as the SQLite adapter.
-import { entityId, findingSlotKey, relationId, type Audit, type Entity, type Finding, type Relation } from "@supah-osint/core";
+import {
+  entityId,
+  findingSlotKey,
+  relationId,
+  type Audit,
+  type Entity,
+  type Finding,
+  type Relation,
+} from "@supah-osint/core";
 import type { Store } from "@supah-osint/engine";
 
 const RESULTS: ReadonlySet<string> = new Set<Finding["result"]>(["found", "not_found", "inconclusive"]);

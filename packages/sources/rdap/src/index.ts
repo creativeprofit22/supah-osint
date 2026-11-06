@@ -17,7 +17,10 @@ export function rdapSource(options: RdapSourceOptions = {}): Source {
     async *run(input: Entity, ctx: SourceContext): AsyncIterable<Finding> {
       if (input.type !== "Domain") return;
       const get = (url: string) => ctx.http.get(url, { signal: ctx.signal });
-      const finding = (url: string | null, rest: Pick<Finding, "result" | "reason" | "entities" | "relations">): Finding => ({
+      const finding = (
+        url: string | null,
+        rest: Pick<Finding, "result" | "reason" | "entities" | "relations">,
+      ): Finding => ({
         auditId: ctx.audit.id,
         source: ID,
         url,
@@ -49,7 +52,10 @@ export function rdapSource(options: RdapSourceOptions = {}): Source {
       }
       const record = response.status === 200 ? parseJson(response.body) : null;
       if (!record) {
-        yield inconclusive(url, response.status === 200 ? "RDAP answer was not valid JSON" : `RDAP server answered HTTP ${response.status}`);
+        yield inconclusive(
+          url,
+          response.status === 200 ? "RDAP answer was not valid JSON" : `RDAP server answered HTTP ${response.status}`,
+        );
         return;
       }
 
@@ -65,7 +71,12 @@ export function rdapSource(options: RdapSourceOptions = {}): Source {
 
       const found = linkContacts(input, contacts);
       if (found.relations.length > 0) {
-        yield finding(url, { result: "found", reason: null, entities: mergeEntities([input, ...found.entities]), relations: found.relations });
+        yield finding(url, {
+          result: "found",
+          reason: null,
+          entities: mergeEntities([input, ...found.entities]),
+          relations: found.relations,
+        });
       } else if (registrarFailed) {
         yield inconclusive(url, registrarFailed);
       } else {

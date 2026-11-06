@@ -145,7 +145,12 @@ export function createSourceGuard(options: SourceGuardOptions): SourceGuard {
     health: () =>
       [...states].map(([sourceId, health]) => {
         const parked = isParked(sourceId);
-        return { sourceId, state: parked ? "parked" : "ok", failures: health.failures, parkedUntil: parked ? health.parkedUntil : null };
+        return {
+          sourceId,
+          state: parked ? "parked" : "ok",
+          failures: health.failures,
+          parkedUntil: parked ? health.parkedUntil : null,
+        };
       }),
     nextKey: (sourceId, keys) => {
       if (keys.length === 0) return null;

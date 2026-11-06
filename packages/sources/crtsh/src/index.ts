@@ -26,12 +26,24 @@ export function crtshSource(options: CrtshSourceOptions = {}): Source {
       const base = { auditId: ctx.audit.id, source: ID, url, foundAt: now(), confidence: 0.8 };
       const response = await ctx.http.get(url, { signal: ctx.signal });
       if (response.status !== 200) {
-        yield { ...base, result: "inconclusive", reason: `crt.sh answered HTTP ${response.status}`, entities: [], relations: [] };
+        yield {
+          ...base,
+          result: "inconclusive",
+          reason: `crt.sh answered HTTP ${response.status}`,
+          entities: [],
+          relations: [],
+        };
         return;
       }
       const names = certificateNames(response.body);
       if (!names) {
-        yield { ...base, result: "inconclusive", reason: "crt.sh answer was not valid JSON", entities: [], relations: [] };
+        yield {
+          ...base,
+          result: "inconclusive",
+          reason: "crt.sh answer was not valid JSON",
+          entities: [],
+          relations: [],
+        };
         return;
       }
       const found = linkSubdomains(input, names);
@@ -39,7 +51,13 @@ export function crtshSource(options: CrtshSourceOptions = {}): Source {
         yield { ...base, result: "not_found", reason: null, entities: [], relations: [] };
         return;
       }
-      yield { ...base, result: "found", reason: null, entities: [input, ...found.entities], relations: found.relations };
+      yield {
+        ...base,
+        result: "found",
+        reason: null,
+        entities: [input, ...found.entities],
+        relations: found.relations,
+      };
     },
   };
 }

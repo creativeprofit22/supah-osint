@@ -17,7 +17,9 @@ test("turns SOA and DMARC addresses into emails and in-domain name servers into 
   const soa = byUrl.get(dnsUrl("eff.org", "SOA"));
   expect(soa?.result).toBe("found");
   expect(keysOf(soa, "Email")).toEqual(["hostmaster@eff.org"]);
-  expect(soa?.relations.map((r) => [r.from, r.label, r.to])).toEqual([[entityId(eff), "has_email", "audit-1|Email|hostmaster@eff.org"]]);
+  expect(soa?.relations.map((r) => [r.from, r.label, r.to])).toEqual([
+    [entityId(eff), "has_email", "audit-1|Email|hostmaster@eff.org"],
+  ]);
 
   const dmarc = byUrl.get(dnsUrl("_dmarc.eff.org", "TXT"));
   expect(keysOf(dmarc, "Email")).toEqual(["dmarc_rua@eff.org", "dmarc_ruf@eff.org"]);
@@ -46,9 +48,14 @@ test("third-party mail and name servers never become entities", async () => {
 test("NXDOMAIN is not found, but SERVFAIL, HTTP errors and bad JSON are inconclusive", async () => {
   const name = "no-such-domain-xyz123abc.org";
   const nx = Object.fromEntries(
-    [dnsUrl(name, "SOA"), dnsUrl(name, "MX"), dnsUrl(name, "NS"), dnsUrl(`_dmarc.${name}`, "TXT")].map((url) => [url, `${DNS}/nxdomain-soa.json`]),
+    [dnsUrl(name, "SOA"), dnsUrl(name, "MX"), dnsUrl(name, "NS"), dnsUrl(`_dmarc.${name}`, "TXT")].map((url) => [
+      url,
+      `${DNS}/nxdomain-soa.json`,
+    ]),
   );
-  expect((await runSource(source, domain(name), fixtureHttp(nx))).map((f) => f.result)).toEqual(Array(4).fill("not_found"));
+  expect((await runSource(source, domain(name), fixtureHttp(nx))).map((f) => f.result)).toEqual(
+    Array(4).fill("not_found"),
+  );
 
   const bad = "dnssec-failed.org";
   const routes = {
@@ -69,10 +76,9 @@ test("NXDOMAIN is not found, but SERVFAIL, HTTP errors and bad JSON are inconclu
 
 test("reads escaped SOA mailboxes and only mailto DMARC report addresses", () => {
   expect(soaEmail(String.raw`ns1.example.com. john\.doe.example.com. 1 2 3 4 5`)).toBe("john.doe@example.com");
-  expect(dmarcEmails("v=DMARC1; p=none; rua=mailto:a@example.com!10m,https://r.example/x; ruf=mailto:b@example.com")).toEqual([
-    "a@example.com",
-    "b@example.com",
-  ]);
+  expect(
+    dmarcEmails("v=DMARC1; p=none; rua=mailto:a@example.com!10m,https://r.example/x; ruf=mailto:b@example.com"),
+  ).toEqual(["a@example.com", "b@example.com"]);
   expect(dmarcEmails("v=spf1 include:example.com ~all")).toEqual([]);
 });
 

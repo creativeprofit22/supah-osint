@@ -14,7 +14,8 @@ export function certificateNames(body: string): string[] | null {
   if (!Array.isArray(parsed)) return null;
   const names: string[] = [];
   for (const row of parsed) {
-    const value: unknown = typeof row === "object" && row !== null ? (row as { name_value?: unknown }).name_value : null;
+    const value: unknown =
+      typeof row === "object" && row !== null ? (row as { name_value?: unknown }).name_value : null;
     if (typeof value !== "string") continue;
     for (const line of value.split("\n")) names.push(line.trim().replace(/^\*\./, ""));
   }

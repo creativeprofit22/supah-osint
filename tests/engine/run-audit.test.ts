@@ -150,7 +150,13 @@ test("a seed from another audit is rejected", async () => {
 test("a source that needs a key is skipped without one and gets it when set; canRun false skips", async () => {
   const calls = callLog();
   const keyed = fakeSource({ id: "keyed", accepts: ["Person"], keyRequirement: "required", calls, produce: () => [] });
-  const optional = fakeSource({ id: "optional", accepts: ["Person"], keyRequirement: "optional", calls, produce: () => [] });
+  const optional = fakeSource({
+    id: "optional",
+    accepts: ["Person"],
+    keyRequirement: "optional",
+    calls,
+    produce: () => [],
+  });
   const refuses = fakeSource({ id: "refuses", accepts: ["Person"], canRun: () => false, calls, produce: () => [] });
 
   const without = await runAudit({ sources: [keyed, optional, refuses], store: createMemoryStore(), http }, { audit });
@@ -308,7 +314,12 @@ test("cancelling aborts the in-flight request a source makes through ctx.http", 
 test("a source that keeps failing is parked across audits while the others carry on, until revived", async () => {
   const guard = createSourceGuard({ clock: createFakeClock(), park: { afterFailures: 2, coolDownMs: 60_000 } });
   const calls = callLog();
-  const flaky = fakeSource({ id: "flaky", accepts: ["Person"], calls, produce: () => Promise.reject(new Error("down")) });
+  const flaky = fakeSource({
+    id: "flaky",
+    accepts: ["Person"],
+    calls,
+    produce: () => Promise.reject(new Error("down")),
+  });
   const fine = fakeSource({ id: "fine", accepts: ["Person"], calls, produce: () => [finding("fine")] });
   const run = () => runAudit({ sources: [flaky, fine], store: createMemoryStore(), http, guard }, { audit });
 

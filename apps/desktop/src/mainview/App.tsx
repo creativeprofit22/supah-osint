@@ -1,4 +1,11 @@
-import type { AppClient, DomainAuditReply, EntityRow, FindingRow, PingReply, SourceHealthRow } from "@supah-osint/rpc/schema";
+import type {
+  AppClient,
+  DomainAuditReply,
+  EntityRow,
+  FindingRow,
+  PingReply,
+  SourceHealthRow,
+} from "@supah-osint/rpc/schema";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 type PingState =
@@ -81,7 +88,12 @@ function DomainAuditPanel({ client, onAuditFinished }: { client: AppClient; onAu
       <form className="key-form" onSubmit={submit}>
         <label>
           Your name
-          <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} required autoComplete="name" />
+          <input
+            value={subjectName}
+            onChange={(event) => setSubjectName(event.target.value)}
+            required
+            autoComplete="name"
+          />
         </label>
         <label>
           Domain you own
@@ -176,7 +188,8 @@ function AuditResults({ reply }: { reply: DomainAuditReply }) {
         <ul className="edges">
           {reply.relations.map((relation) => (
             <li key={`${relation.from}-${relation.label}-${relation.to}`}>
-              {labels.get(relation.from) ?? relation.from} — {relation.label.replaceAll("_", " ")} → {labels.get(relation.to) ?? relation.to}
+              {labels.get(relation.from) ?? relation.from} — {relation.label.replaceAll("_", " ")} →{" "}
+              {labels.get(relation.to) ?? relation.to}
             </li>
           ))}
         </ul>
@@ -260,9 +273,21 @@ function SourcesPanel({ client, healthVersion }: { client: AppClient; healthVers
   );
 }
 
-type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; sourceId: string; count: number } | { kind: "failed"; error: string };
+type SaveState =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved"; sourceId: string; count: number }
+  | { kind: "failed"; error: string };
 
-function KeyForm({ client, sourceIds, onSaved }: { client: AppClient; sourceIds: string[]; onSaved: () => Promise<void> }) {
+function KeyForm({
+  client,
+  sourceIds,
+  onSaved,
+}: {
+  client: AppClient;
+  sourceIds: string[];
+  onSaved: () => Promise<void>;
+}) {
   const [sourceId, setSourceId] = useState("");
   const [keysText, setKeysText] = useState("");
   const [save, setSave] = useState<SaveState>({ kind: "idle" });

@@ -22,12 +22,15 @@ test("turns certificate names into deduped subdomains of the audited domain", as
 
 test("no certificates is not found; errors and broken JSON are inconclusive", async () => {
   const url = crtshQueryUrl("example.org");
-  const run = (route: Parameters<typeof fixtureHttp>[0][string]) => runSource(source, domain("example.org"), fixtureHttp({ [url]: route }));
+  const run = (route: Parameters<typeof fixtureHttp>[0][string]) =>
+    runSource(source, domain("example.org"), fixtureHttp({ [url]: route }));
   expect((await run(`${CRTSH}/empty.json`)).map((f) => f.result)).toEqual(["not_found"]);
   expect((await run({ file: `${CRTSH}/bad-gateway.html`, status: 502 })).map((f) => [f.result, f.reason])).toEqual([
     ["inconclusive", "crt.sh answered HTTP 502"],
   ]);
-  expect((await run(`${CRTSH}/malformed.json`)).map((f) => [f.result, f.reason])).toEqual([["inconclusive", "crt.sh answer was not valid JSON"]]);
+  expect((await run(`${CRTSH}/malformed.json`)).map((f) => [f.result, f.reason])).toEqual([
+    ["inconclusive", "crt.sh answer was not valid JSON"],
+  ]);
 });
 
 test("is rate limited to one request every five seconds", () => {

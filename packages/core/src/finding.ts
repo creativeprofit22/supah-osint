@@ -27,7 +27,8 @@ export function createFinding(input: Finding): Result<Finding> {
     return err(`a ${input.result} finding cannot carry entities or relations`);
   }
   if (input.entities.some((entity) => entity.auditId !== input.auditId)) return err("entity belongs to another audit");
-  if (input.relations.some((relation) => relation.auditId !== input.auditId)) return err("relation belongs to another audit");
+  if (input.relations.some((relation) => relation.auditId !== input.auditId))
+    return err("relation belongs to another audit");
   const byId = new Map<EntityId, Entity>(input.entities.map((entity) => [entityId(entity), entity]));
   for (const relation of input.relations) {
     const from = byId.get(relation.from);
