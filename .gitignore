@@ -27,3 +27,8 @@ build/
 .hutch/
 artifacts/
 .cottontail-tmp/
+
+# Coding agent scratch output (local only)
+.gg/evidence/
+.gg/plans/
+.gg/tmp/
