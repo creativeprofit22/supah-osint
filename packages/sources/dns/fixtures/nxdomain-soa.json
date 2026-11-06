@@ -1,0 +1,1 @@
+{"Status":3,"TC":false,"RD":true,"RA":true,"AD":false,"CD":false,"Question":[{"name":"no-such-domain-xyz123abc.org.","type":6}],"Authority":[{"name":"org.","type":6,"TTL":0,"data":"v0n0.pir-ns.org. hostmaster.donuts.email. 1793989352 7200 900 1209600 3600"}],"Comment":"Response from 2001:500:e::1."}

@@ -1,0 +1,1 @@
+{"Status":0,"TC":false,"RD":true,"RA":true,"AD":false,"CD":false,"Question":[{"name":"eff.org.","type":2}],"Answer":[{"name":"eff.org.","type":2,"TTL":7200,"data":"ns2.eff.org."},{"name":"eff.org.","type":2,"TTL":7200,"data":"ns3.eff.org."}],"Comment":"Response from 138.68.29.57."}

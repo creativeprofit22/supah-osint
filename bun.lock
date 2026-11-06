@@ -73,6 +73,30 @@
         "@supah-osint/core": "workspace:*",
       },
     },
+    "packages/sources/crtsh": {
+      "name": "@supah-osint/source-crtsh",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
+    "packages/sources/dns": {
+      "name": "@supah-osint/source-dns",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
+    "packages/sources/rdap": {
+      "name": "@supah-osint/source-rdap",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
     "packages/storage": {
       "name": "@supah-osint/storage",
       "version": "0.0.0",
@@ -179,6 +203,12 @@
     "@supah-osint/rpc": ["@supah-osint/rpc@workspace:packages/rpc"],
 
     "@supah-osint/scheduler": ["@supah-osint/scheduler@workspace:packages/scheduler"],
+
+    "@supah-osint/source-crtsh": ["@supah-osint/source-crtsh@workspace:packages/sources/crtsh"],
+
+    "@supah-osint/source-dns": ["@supah-osint/source-dns@workspace:packages/sources/dns"],
+
+    "@supah-osint/source-rdap": ["@supah-osint/source-rdap@workspace:packages/sources/rdap"],
 
     "@supah-osint/storage": ["@supah-osint/storage@workspace:packages/storage"],
 

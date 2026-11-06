@@ -1,0 +1,222 @@
+[
+  {
+    "issuer_ca_id": 1575,
+    "issuer_name": "C=FR, ST=Paris, L=Paris, O=Gandi, CN=Gandi Standard SSL CA 2",
+    "common_name": "*.app.eff.org",
+    "name_value": "*.app.eff.org\napp.eff.org",
+    "id": 652122678,
+    "not_before": "2018-08-17T00:00:00",
+    "not_after": "2019-10-12T23:59:59",
+    "serial_number": "4b16c2185660d3a1491a1b623bb7d722",
+    "result_count": 3
+  },
+  {
+    "issuer_ca_id": 1575,
+    "issuer_name": "C=FR, ST=Paris, L=Paris, O=Gandi, CN=Gandi Standard SSL CA 2",
+    "common_name": "*.app.eff.org",
+    "name_value": "*.app.eff.org\napp.eff.org",
+    "id": 652122896,
+    "not_before": "2018-08-17T00:00:00",
+    "not_after": "2019-10-12T23:59:59",
+    "serial_number": "4b16c2185660d3a1491a1b623bb7d722",
+    "result_count": 3
+  },
+  {
+    "issuer_ca_id": 1574,
+    "issuer_name": "C=US, O=SSL.com, OU=www.ssl.com, CN=SSL.com DV CA",
+    "common_name": "*.eff.org",
+    "name_value": "*.dev.eff.org\n*.eff.org\n*.staging.eff.org",
+    "id": 556951431,
+    "not_before": "2018-06-28T00:00:00",
+    "not_after": "2019-01-30T23:59:59",
+    "serial_number": "009ca15fb94ebbd13b773ce2616f6d9aa3",
+    "result_count": 4
+  },
+  {
+    "issuer_ca_id": 1574,
+    "issuer_name": "C=US, O=SSL.com, OU=www.ssl.com, CN=SSL.com DV CA",
+    "common_name": "*.eff.org",
+    "name_value": "*.dev.eff.org\n*.eff.org\n*.staging.eff.org",
+    "id": 556951634,
+    "not_before": "2018-06-28T00:00:00",
+    "not_after": "2019-01-30T23:59:59",
+    "serial_number": "009ca15fb94ebbd13b773ce2616f6d9aa3",
+    "result_count": 4
+  },
+  {
+    "issuer_ca_id": 1574,
+    "issuer_name": "C=US, O=SSL.com, OU=www.ssl.com, CN=SSL.com DV CA",
+    "common_name": "*.eff.org",
+    "name_value": "*.dev.eff.org\n*.eff.org\n*.staging.eff.org",
+    "id": 255099865,
+    "not_before": "2017-11-11T00:00:00",
+    "not_after": "2019-01-30T23:59:59",
+    "serial_number": "45258cd4f8cd408c840a00f7983c0e2e",
+    "result_count": 4
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "lb6.eff.org",
+    "name_value": "autoconfig.eff.org\ncerb.eff.org\nethercalc.eff.org\netherpad.eff.org\nfab.eff.org\nlb6.eff.org\nmfb.supporters.dev.eff.org\nnagios1.eff.org\npeterw.supporters.dev.eff.org\nredmine.eff.org\nschatzkin.supporters.dev.eff.org",
+    "id": 1073447118,
+    "not_before": "2019-01-01T19:30:51",
+    "not_after": "2019-04-01T19:30:51",
+    "serial_number": "03f0589ff226f5a1f64a7064b842b63bb6d6",
+    "result_count": 12
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "lb6.eff.org",
+    "name_value": "autoconfig.eff.org\ncerb.eff.org\nethercalc.eff.org\netherpad.eff.org\nfab.eff.org\nlb6.eff.org\nmfb.supporters.dev.eff.org\nnagios1.eff.org\npeterw.supporters.dev.eff.org\nredmine.eff.org\nschatzkin.supporters.dev.eff.org\nsentry.eff.org\nsquiggy.supporters.dev.eff.org\nsupporters.dev.eff.org\nvivian.supporters.dev.eff.org\nwhere.eff.org",
+    "id": 1073444928,
+    "not_before": "2019-01-01T19:30:51",
+    "not_after": "2019-04-01T19:30:51",
+    "serial_number": "03f0589ff226f5a1f64a7064b842b63bb6d6",
+    "result_count": 17
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "atlas.eff.org",
+    "name_value": "atlas.eff.org\nhttpse-atlas.eff.org\nhttpse.eff.org\nhttps-everywhere-atlas.eff.org",
+    "id": 1037234553,
+    "not_before": "2018-12-17T19:22:24",
+    "not_after": "2019-03-17T19:22:24",
+    "serial_number": "03db6dd77d539330612d80e92300452344f5",
+    "result_count": 5
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.pay.alpha.eff.org",
+    "name_value": "www.pay.alpha.eff.org",
+    "id": 1065853965,
+    "not_before": "2018-12-29T13:10:16",
+    "not_after": "2019-03-29T13:10:16",
+    "serial_number": "03a1815b411a384f28283e8fa6beb84f4868",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.pay.alpha.eff.org",
+    "name_value": "www.pay.alpha.eff.org",
+    "id": 1065849959,
+    "not_before": "2018-12-29T13:10:16",
+    "not_after": "2019-03-29T13:10:16",
+    "serial_number": "03a1815b411a384f28283e8fa6beb84f4868",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.apple.alpha.eff.org",
+    "name_value": "www.apple.alpha.eff.org",
+    "id": 1063475938,
+    "not_before": "2018-12-28T12:04:40",
+    "not_after": "2019-03-28T12:04:40",
+    "serial_number": "031bacd5e4136fdc3c4e505bc85adfff3cfe",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.apple.alpha.eff.org",
+    "name_value": "www.apple.alpha.eff.org",
+    "id": 1063409955,
+    "not_before": "2018-12-28T12:04:40",
+    "not_after": "2019-03-28T12:04:40",
+    "serial_number": "031bacd5e4136fdc3c4e505bc85adfff3cfe",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.apple.d5.eff.org",
+    "name_value": "www.apple.d5.eff.org",
+    "id": 1063405326,
+    "not_before": "2018-12-28T12:02:00",
+    "not_after": "2019-03-28T12:02:00",
+    "serial_number": "03d85c831a8f743f8b91bd8443b126252839",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "www.apple.d5.eff.org",
+    "name_value": "www.apple.d5.eff.org",
+    "id": 1063463201,
+    "not_before": "2018-12-28T12:02:00",
+    "not_after": "2019-03-28T12:02:00",
+    "serial_number": "03d85c831a8f743f8b91bd8443b126252839",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "apple.d5.eff.org",
+    "name_value": "apple.d5.eff.org",
+    "id": 1063350584,
+    "not_before": "2018-12-28T11:25:34",
+    "not_after": "2019-03-28T11:25:34",
+    "serial_number": "03fb6947d347503277db7e4c57fe80862942",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "apple.d5.eff.org",
+    "name_value": "apple.d5.eff.org",
+    "id": 1063343172,
+    "not_before": "2018-12-28T11:25:34",
+    "not_after": "2019-03-28T11:25:34",
+    "serial_number": "03fb6947d347503277db7e4c57fe80862942",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "apple.alpha.eff.org",
+    "name_value": "apple.alpha.eff.org",
+    "id": 1063336707,
+    "not_before": "2018-12-28T11:14:28",
+    "not_after": "2019-03-28T11:14:28",
+    "serial_number": "03a8c3d6788bc853f144b55c5141721ad7af",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "apple.alpha.eff.org",
+    "name_value": "apple.alpha.eff.org",
+    "id": 1063323360,
+    "not_before": "2018-12-28T11:14:28",
+    "not_after": "2019-03-28T11:14:28",
+    "serial_number": "03a8c3d6788bc853f144b55c5141721ad7af",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "donate.d5.eff.org",
+    "name_value": "donate.d5.eff.org",
+    "id": 1040052671,
+    "not_before": "2018-12-18T20:52:05",
+    "not_after": "2019-03-18T20:52:05",
+    "serial_number": "03308c847fc597399e8293156d6ca5c071f6",
+    "result_count": 2
+  },
+  {
+    "issuer_ca_id": 16418,
+    "issuer_name": "C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3",
+    "common_name": "donate.d5.eff.org",
+    "name_value": "donate.d5.eff.org",
+    "id": 1040053453,
+    "not_before": "2018-12-18T20:52:05",
+    "not_after": "2019-03-18T20:52:05",
+    "serial_number": "03308c847fc597399e8293156d6ca5c071f6",
+    "result_count": 2
+  }
+]

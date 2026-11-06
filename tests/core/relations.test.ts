@@ -31,6 +31,14 @@ describe("allowed edges", () => {
     expect(isAllowedEdge("Person", "owns_domain", "Domain")).toBe(false);
   });
 
+  test("a domain can have subdomains and contact emails", () => {
+    const domain = value(createEntity("audit-1", "Domain", { name: "example.com" }));
+    const sub = value(createEntity("audit-1", "Domain", { name: "mail.example.com" }));
+    expect(createRelation("subdomain_of", sub, domain).ok).toBe(true);
+    expect(createRelation("has_email", domain, email).ok).toBe(true);
+    expect(createRelation("subdomain_of", sub, email).ok).toBe(false);
+  });
+
   test("rejects an edge between two audits", () => {
     const otherOrg = value(createEntity("audit-2", "Organization", { name: "Acme Ltd" }));
     expect(createRelation("works_for", person, otherOrg).ok).toBe(false);

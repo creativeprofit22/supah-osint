@@ -15,7 +15,8 @@ export type RelationLabel =
   | "owns_domain"
   | "linked_to"
   | "on_domain"
-  | "registered_by";
+  | "registered_by"
+  | "subdomain_of";
 
 export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationLabel, readonly EntityType[]>>>> = {
   Person: {
@@ -45,7 +46,7 @@ export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationL
   },
   Email: { on_domain: ["Domain"] },
   Url: { on_domain: ["Domain"] },
-  Domain: { registered_by: ["Person", "Organization", "Email"] },
+  Domain: { registered_by: ["Person", "Organization", "Email"], subdomain_of: ["Domain"], has_email: ["Email"] },
   Address: { located_in: ["Location"] },
   Phone: {},
   Location: {},

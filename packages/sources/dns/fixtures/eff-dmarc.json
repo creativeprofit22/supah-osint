@@ -1,0 +1,1 @@
+{"Status":0,"TC":false,"RD":true,"RA":true,"AD":false,"CD":false,"Question":[{"name":"_dmarc.eff.org.","type":16}],"Answer":[{"name":"_dmarc.eff.org.","type":16,"TTL":7200,"data":"v=DMARC1; p=none; rua=mailto:dmarc_rua@eff.org; ruf=mailto:dmarc_ruf@eff.org;"}],"Comment":"Response from 173.239.79.201."}

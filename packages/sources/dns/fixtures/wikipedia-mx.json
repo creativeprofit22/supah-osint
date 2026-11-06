@@ -1,0 +1,1 @@
+{"Status":0,"TC":false,"RD":true,"RA":true,"AD":false,"CD":false,"Question":[{"name":"wikipedia.org.","type":15}],"Answer":[{"name":"wikipedia.org.","type":15,"TTL":300,"data":"10 mx-in1001.wikimedia.org."},{"name":"wikipedia.org.","type":15,"TTL":300,"data":"10 mx-in2001.wikimedia.org."}],"Comment":"Response from 2a02:ec80:53::1."}
