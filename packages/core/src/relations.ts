@@ -17,7 +17,8 @@ export type RelationLabel =
   | "linked_to"
   | "on_domain"
   | "registered_by"
-  | "subdomain_of";
+  | "subdomain_of"
+  | "exposed_in";
 
 export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationLabel, readonly EntityType[]>>>> = {
   Person: {
@@ -47,13 +48,14 @@ export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationL
     has_username: ["Username"],
     linked_to: ["Account"],
   },
-  Email: { on_domain: ["Domain"] },
+  Email: { on_domain: ["Domain"], exposed_in: ["Breach"] },
   Url: { on_domain: ["Domain"] },
   Domain: { registered_by: ["Person", "Organization", "Email"], subdomain_of: ["Domain"], has_email: ["Email"] },
   Address: { located_in: ["Location"] },
   Phone: {},
   Location: {},
   Username: {},
+  Breach: {},
 };
 
 export type Relation = {

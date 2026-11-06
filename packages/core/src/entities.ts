@@ -32,7 +32,8 @@ export type EntityType =
   | "Address"
   | "Location"
   | "Url"
-  | "Username";
+  | "Username"
+  | "Breach";
 
 export const ENTITY_TYPES: readonly EntityType[] = [
   "Person",
@@ -45,6 +46,7 @@ export const ENTITY_TYPES: readonly EntityType[] = [
   "Location",
   "Url",
   "Username",
+  "Breach",
 ];
 
 export type EntityProps = {
@@ -59,6 +61,8 @@ export type EntityProps = {
   Location: { name: string };
   Url: { href: string };
   Username: { name: string };
+  // Only the breach's name, title and date; never passwords, hashes or other breached data.
+  Breach: { name: string; title: string; breachDate: string | null };
 };
 
 export type RawEntityProps = Omit<EntityProps, "Phone"> & { Phone: { number: string } };
@@ -89,6 +93,15 @@ function named<K extends "Person" | "Organization" | "Location">(raw: { name: st
 function textual(raw: { text: string }): Built<"Address"> {
   const key = normalizeText(raw.text);
   return key === "" ? err("address is empty") : ok({ key, props: { text: tidy(raw.text) } });
+}
+
+function breach(raw: EntityProps["Breach"]): Built<"Breach"> {
+  const name = raw.name.trim();
+  if (name === "") return err("breach name is empty");
+  const date = raw.breachDate;
+  if (date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return err(`breach date is not YYYY-MM-DD: ${date}`);
+  const title = tidy(raw.title) || name;
+  return ok({ key: name.toLowerCase(), props: { name, title, breachDate: date } });
 }
 
 // Person and Organization merge on exact normalized name; fine within one audit's single subject.
@@ -124,6 +137,7 @@ const builders: { [K in EntityType]: Builder<K> } = {
     const key = normalizeUsername(raw.name);
     return key.ok ? ok({ key: key.value, props: { name: raw.name.trim() } }) : key;
   },
+  Breach: (raw) => breach(raw),
 };
 
 export function createEntity<K extends EntityType>(

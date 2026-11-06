@@ -70,3 +70,23 @@ describe("allowed edges", () => {
     expect(Object.keys(ALLOWED_EDGES).sort()).toEqual([...ENTITY_TYPES].sort());
   });
 });
+
+describe("breaches", () => {
+  test("an email can be exposed in a breach, keyed by lowercased name", () => {
+    const breach = value(
+      createEntity("audit-1", "Breach", { name: " Adobe ", title: "Adobe", breachDate: "2013-10-04" }),
+    );
+    expect(breach.key).toBe("adobe");
+    expect(breach.props).toEqual({ name: "Adobe", title: "Adobe", breachDate: "2013-10-04" });
+    expect(createRelation("exposed_in", email, breach).ok).toBe(true);
+    expect(createRelation("exposed_in", person, breach).ok).toBe(false);
+    expect(createRelation("exposed_in", breach, email).ok).toBe(false);
+  });
+
+  test("a breach needs a name and a YYYY-MM-DD date or none", () => {
+    expect(createEntity("audit-1", "Breach", { name: "  ", title: "x", breachDate: null }).ok).toBe(false);
+    expect(createEntity("audit-1", "Breach", { name: "A", title: "A", breachDate: "04/10/2013" }).ok).toBe(false);
+    const undated = value(createEntity("audit-1", "Breach", { name: "A", title: "", breachDate: null }));
+    expect(undated.props).toEqual({ name: "A", title: "A", breachDate: null });
+  });
+});
