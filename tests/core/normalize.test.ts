@@ -8,6 +8,7 @@ import {
   normalizeEmail,
   normalizePhone,
   normalizeUrl,
+  normalizeUsername,
   type Entity,
   type Result,
 } from "../../packages/core/src/index.ts";
@@ -84,5 +85,22 @@ describe("other identities", () => {
     const a = value(createEntity("audit-1", "Email", { address: "bob@example.com" }));
     const b = value(createEntity("audit-2", "Email", { address: "bob@example.com" }));
     expect(mergeEntities([a, b])).toHaveLength(2);
+  });
+});
+
+describe("username", () => {
+  test("key is trimmed and lowercased", () => {
+    expect(value(normalizeUsername("  BobSmith "))).toBe("bobsmith");
+  });
+
+  test("rejects empty names and names with whitespace inside", () => {
+    expect(normalizeUsername("   ").ok).toBe(false);
+    expect(normalizeUsername("bob smith").ok).toBe(false);
+  });
+
+  test("entity keeps the original case for building URLs", () => {
+    const username = value(createEntity("audit-1", "Username", { name: " BobSmith " }));
+    expect(username.key).toBe("bobsmith");
+    expect(username.props.name).toBe("BobSmith");
   });
 });

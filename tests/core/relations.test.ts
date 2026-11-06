@@ -39,6 +39,23 @@ describe("allowed edges", () => {
     expect(createRelation("subdomain_of", sub, email).ok).toBe(false);
   });
 
+  test("people and accounts can have a username, a username points nowhere", () => {
+    const username = value(createEntity("audit-1", "Username", { name: "bobsmith" }));
+    const account = value(createEntity("audit-1", "Account", { service: "GitHub", username: "bobsmith" }));
+    expect(createRelation("has_username", person, username).ok).toBe(true);
+    expect(createRelation("has_username", account, username).ok).toBe(true);
+    expect(createRelation("has_username", username, account).ok).toBe(false);
+    expect(createRelation("has_username", email, username).ok).toBe(false);
+  });
+
+  test("an account can be labelled adult; the label only appears when set", () => {
+    const adult = value(createEntity("audit-1", "Account", { service: "Site", username: "bob", adult: true }));
+    const plain = value(createEntity("audit-1", "Account", { service: "Site", username: "bob", adult: false }));
+    expect(adult.props).toEqual({ service: "Site", username: "bob", adult: true });
+    expect(plain.props).toEqual({ service: "Site", username: "bob" });
+    expect(adult.key).toBe(plain.key);
+  });
+
   test("rejects an edge between two audits", () => {
     const otherOrg = value(createEntity("audit-2", "Organization", { name: "Acme Ltd" }));
     expect(createRelation("works_for", person, otherOrg).ok).toBe(false);

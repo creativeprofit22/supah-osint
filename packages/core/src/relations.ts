@@ -7,6 +7,7 @@ export type RelationLabel =
   | "has_email"
   | "has_phone"
   | "has_account"
+  | "has_username"
   | "has_url"
   | "lives_at"
   | "located_at"
@@ -24,6 +25,7 @@ export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationL
     has_email: ["Email"],
     has_phone: ["Phone"],
     has_account: ["Account"],
+    has_username: ["Username"],
     has_url: ["Url"],
     lives_at: ["Address"],
     located_in: ["Location"],
@@ -42,6 +44,7 @@ export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationL
     has_email: ["Email"],
     has_phone: ["Phone"],
     has_url: ["Url"],
+    has_username: ["Username"],
     linked_to: ["Account"],
   },
   Email: { on_domain: ["Domain"] },
@@ -50,6 +53,7 @@ export const ALLOWED_EDGES: Readonly<Record<EntityType, Partial<Record<RelationL
   Address: { located_in: ["Location"] },
   Phone: {},
   Location: {},
+  Username: {},
 };
 
 export type Relation = {

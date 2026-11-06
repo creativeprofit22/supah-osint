@@ -8,6 +8,7 @@ import {
   normalizePhone,
   normalizeText,
   normalizeUrl,
+  normalizeUsername,
   ok,
   type PhoneOptions,
   type Result,
@@ -30,7 +31,8 @@ export type EntityType =
   | "Domain"
   | "Address"
   | "Location"
-  | "Url";
+  | "Url"
+  | "Username";
 
 export const ENTITY_TYPES: readonly EntityType[] = [
   "Person",
@@ -42,18 +44,21 @@ export const ENTITY_TYPES: readonly EntityType[] = [
   "Address",
   "Location",
   "Url",
+  "Username",
 ];
 
 export type EntityProps = {
   Person: { name: string };
   Organization: { name: string };
-  Account: { service: string; username: string };
+  // adult: found on an adult site, so it can hint at sensitive information about the person.
+  Account: { service: string; username: string; adult?: boolean };
   Email: { address: string };
   Phone: { e164: string };
   Domain: { name: string };
   Address: { text: string };
   Location: { name: string };
   Url: { href: string };
+  Username: { name: string };
 };
 
 export type RawEntityProps = Omit<EntityProps, "Phone"> & { Phone: { number: string } };
@@ -94,7 +99,9 @@ const builders: { [K in EntityType]: Builder<K> } = {
   Address: (raw) => textual(raw),
   Account: (raw) => {
     const key = normalizeAccount(raw.service, raw.username);
-    return key.ok ? ok({ key: key.value, props: { service: raw.service.trim(), username: raw.username.trim() } }) : key;
+    if (!key.ok) return key;
+    const props = { service: raw.service.trim(), username: raw.username.trim() };
+    return ok({ key: key.value, props: raw.adult ? { ...props, adult: true } : props });
   },
   Email: (raw) => {
     const key = normalizeEmail(raw.address);
@@ -111,6 +118,11 @@ const builders: { [K in EntityType]: Builder<K> } = {
   Url: (raw) => {
     const key = normalizeUrl(raw.href);
     return key.ok ? ok({ key: key.value, props: { href: key.value } }) : key;
+  },
+  // Props keep the original case because profile URLs can be case-sensitive.
+  Username: (raw) => {
+    const key = normalizeUsername(raw.name);
+    return key.ok ? ok({ key: key.value, props: { name: raw.name.trim() } }) : key;
   },
 };
 

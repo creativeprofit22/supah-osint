@@ -74,6 +74,14 @@ export function normalizeUrl(raw: string): Result<string> {
   return ok(url.pathname === "/" && !url.search ? href.replace(/\/$/, "") : href);
 }
 
+// A bare handle searched across sites; the key ignores case because most sites do.
+export function normalizeUsername(raw: string): Result<string> {
+  const name = raw.trim();
+  if (name === "") return err("username is empty");
+  if (/\s/.test(name)) return err(`username contains whitespace: ${raw}`);
+  return ok(name.toLowerCase());
+}
+
 export function normalizeAccount(service: string, username: string): Result<string> {
   const s = service.trim().toLowerCase();
   const u = username.trim().toLowerCase();
