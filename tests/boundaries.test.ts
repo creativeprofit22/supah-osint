@@ -54,6 +54,7 @@ describe("onion import rules", () => {
       "entry-only-through-rpc: apps/desktop/src/index.ts → packages/engine/src/index.ts",
       "entry-only-through-rpc: features/demo/src/index.ts → packages/engine/src/index.ts",
       "entry-only-through-rpc: packages/ui/src/index.ts → packages/storage/src/index.ts",
+      "only-storage-touches-sqlite: packages/rpc/src/index.ts → bun:sqlite",
       "package-must-be-in-a-ring: packages/unringed/src/index.ts → packages/core/src/index.ts",
     ]);
   }, TIMEOUT);
@@ -61,5 +62,16 @@ describe("onion import rules", () => {
   test("core importing storage fails the check", async () => {
     const { list } = await violations(join(root, "tests/fixtures/bad-tree"));
     expect(list).toContain("core-is-pure: packages/core/src/index.ts → packages/storage/src/index.ts");
+  }, TIMEOUT);
+
+  test("only packages/storage may import bun:sqlite", async () => {
+    const { list } = await violations(join(root, "tests/fixtures/bad-tree"));
+    expect(list).toContain("only-storage-touches-sqlite: packages/rpc/src/index.ts → bun:sqlite");
+    const real = await violations(root);
+    const sqliteUsers = real.result.modules
+      .filter((m) => m.dependencies.some((d) => d.resolved === "bun:sqlite"))
+      .map((m) => m.source);
+    expect(sqliteUsers.length).toBeGreaterThan(0);
+    expect(sqliteUsers.every((source) => source.startsWith("packages/storage/"))).toBe(true);
   }, TIMEOUT);
 });

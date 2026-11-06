@@ -33,6 +33,7 @@ test("runSearch drops findings for another audit or that break the Finding rules
   const returned = await runSearch({ sources: [source], store, http }, audit);
 
   expect(returned).toEqual([valid]);
+  expect(await store.getAudit(audit.id)).toEqual(audit);
   expect(await store.listFindings(audit.id)).toEqual([valid]);
   expect(await store.listFindings("audit-2")).toEqual([]);
 });

@@ -1,15 +1,5 @@
-// Ring 3 (adapter): implements engine's Store.
-import { findingSlotKey, type Finding } from "@supah-osint/core";
-import type { Store } from "@supah-osint/engine";
-
-export function createMemoryStore(): Store {
-  const rows = new Map<string, Finding>();
-  return {
-    async saveFindings(findings) {
-      for (const finding of findings) rows.set(findingSlotKey(finding), finding);
-    },
-    async listFindings(auditId) {
-      return [...rows.values()].filter((finding) => finding.auditId === auditId);
-    },
-  };
-}
+// Ring 3 (adapter): implements engine's Store. The only package that touches the database.
+export { createMemoryStore } from "./memory.ts";
+export { LATEST_VERSION, MIGRATIONS, migrate, schemaVersion, type Migration } from "./migrations.ts";
+export { defaultDatabasePath } from "./paths.ts";
+export { openSqliteStore, type SqliteStore } from "./sqlite.ts";

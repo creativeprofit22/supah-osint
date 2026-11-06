@@ -31,6 +31,7 @@ Encoded in [`.dependency-cruiser.cjs`](../.dependency-cruiser.cjs), all errors:
 - `application-inward-only`, `application-no-builtins`: ring 2 imports only core and ring 2.
 - `adapters-not-to-entry`: ring 3 never imports ring 4.
 - `entry-only-through-rpc`: ring 4 never imports app internals (so the UI never touches storage or sources).
+- `only-storage-touches-sqlite`: only `packages/storage` imports `bun:sqlite` (or `node:sqlite`); everything else reaches the database through the engine's `Store`.
 - `no-circular`, `not-to-unresolvable`.
 
 Rules match path patterns, so packages that don't exist yet (`sources/*`, `evidence`, `removal`, `features/*`) are covered as soon as they're added. A workspace package can also only import what its `package.json` declares, because Bun links each package's own dependencies.

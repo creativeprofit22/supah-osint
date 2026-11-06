@@ -58,6 +58,13 @@ module.exports = {
       to: { path: APP_INTERNALS },
     },
     {
+      name: "only-storage-touches-sqlite",
+      comment: "packages/storage is the only package that opens the database.",
+      severity: "error",
+      from: { pathNot: "^packages/storage/" },
+      to: { path: "^(bun:|node:)?sqlite$" },
+    },
+    {
       name: "no-circular",
       severity: "error",
       from: {},
