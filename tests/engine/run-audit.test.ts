@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { entityId, type Entity } from "../../packages/core/src/index.ts";
-import { runAudit, type Http, type Source } from "../../packages/engine/src/index.ts";
+import { createSourceGuard, runAudit, staticKeys, type Http, type Source } from "../../packages/engine/src/index.ts";
+import { createFakeClock } from "./fake-clock.ts";
 import { createMemoryStore } from "../../packages/storage/src/index.ts";
 import { account, audit, callLog, email, fakeSource, finding, http, linkFinding } from "./fake-sources.ts";
 
@@ -161,7 +162,7 @@ test("a source that needs a key is skipped without one and gets it when set; can
 
   calls.length = 0;
   const withKey = await runAudit(
-    { sources: [keyed], store: createMemoryStore(), http, keys: { keyed: "secret" } },
+    { sources: [keyed], store: createMemoryStore(), http, keys: staticKeys({ keyed: ["secret"] }) },
     { audit },
   );
   expect(withKey.skipped).toEqual([]);
@@ -302,4 +303,67 @@ test("cancelling aborts the in-flight request a source makes through ctx.http", 
 
   expect(received?.aborted).toBe(true);
   expect(run.status).toBe("cancelled");
+});
+
+test("a source that keeps failing is parked across audits while the others carry on, until revived", async () => {
+  const guard = createSourceGuard({ clock: createFakeClock(), park: { afterFailures: 2, coolDownMs: 60_000 } });
+  const calls = callLog();
+  const flaky = fakeSource({ id: "flaky", accepts: ["Person"], calls, produce: () => Promise.reject(new Error("down")) });
+  const fine = fakeSource({ id: "fine", accepts: ["Person"], calls, produce: () => [finding("fine")] });
+  const run = () => runAudit({ sources: [flaky, fine], store: createMemoryStore(), http, guard }, { audit });
+
+  await run();
+  await run();
+  calls.length = 0;
+  const parked = await run();
+  expect(parked.status).toBe("done");
+  expect(parked.skipped.map((skip) => [skip.sourceId, skip.reason])).toEqual([["flaky", "parked"]]);
+  expect(parked.findings.map((found) => found.source)).toEqual(["fine"]);
+  expect(calls.map((call) => call.sourceId)).toEqual(["fine"]);
+
+  guard.revive("flaky");
+  calls.length = 0;
+  const revived = await run();
+  expect(revived.skipped).toEqual([]);
+  expect(calls.map((call) => call.sourceId)).toEqual(["flaky", "fine"]);
+});
+
+test("rotates through a source's keys, one per lookup", async () => {
+  const calls = callLog();
+  const keyed = fakeSource({ id: "keyed", accepts: ["Email"], keyRequirement: "required", calls, produce: () => [] });
+  await runAudit(
+    { sources: [keyed], store: createMemoryStore(), http, keys: staticKeys({ keyed: ["k1", "k2"] }) },
+    { audit, seeds: [email("a@example.com"), email("b@example.com"), email("c@example.com")] },
+  );
+  expect(calls.map((call) => call.key)).toEqual(["k1", "k2", "k1"]);
+});
+
+test("never stores a source's API key, from errors, urls, reasons or entity props", async () => {
+  const key = "fake-test-token-42";
+  const leaky = fakeSource({
+    id: "leaky",
+    accepts: ["Email"],
+    calls: callLog(),
+    produce: (input) => {
+      if (entityId(input) === entityId(email("boom@example.com"))) {
+        return Promise.reject(new Error(`GET https://api.example.com/?key=${key} failed`));
+      }
+      return [
+        finding("leaky", { url: `https://api.example.com/?key=${key}`, result: "inconclusive", reason: `used ${key}` }),
+        finding("leaky", { url: "https://example.com/props", entities: [account("github", key)] }),
+      ];
+    },
+  });
+  const store = createMemoryStore();
+  const run = await runAudit(
+    { sources: [leaky], store, http, keys: staticKeys({ leaky: [key, "spare"] }) },
+    { audit, seeds: [email("ok@example.com"), email("boom@example.com")] },
+  );
+  const saved = JSON.stringify(await store.listFindings(audit.id)) + JSON.stringify(await store.listEntities(audit.id));
+  expect(saved).not.toContain(key);
+  expect(run.findings).toHaveLength(2);
+  const scrubbed = run.findings.find((found) => found.url === "https://api.example.com/?key=[redacted]");
+  expect(scrubbed?.reason).toBe("used [redacted]");
+  const failure = run.findings.find((found) => found.url?.startsWith("engine-failure:"));
+  expect(failure?.reason).toBe("GET https://api.example.com/?key=[redacted] failed");
 });

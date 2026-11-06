@@ -11,7 +11,9 @@ import {
   type EntityType,
   type Finding,
 } from "@supah-osint/core";
+import { systemClock } from "./clock.ts";
 import type { EngineDeps } from "./deps.ts";
+import { createSourceGuard, type SourceGuard } from "./guard.ts";
 import type { Source, SourceContext } from "./source.ts";
 
 export type SkippedLookup = { sourceId: string; entityId: EntityId; reason: string };
@@ -43,6 +45,14 @@ export async function runAudit(deps: EngineDeps, options: RunAuditOptions): Prom
     for (const type of new Set(source.accepts)) registry.set(type, [...(registry.get(type) ?? []), source]);
   }
 
+  const guard = deps.guard ?? createSourceGuard({ clock: systemClock });
+  const keys = new Map<string, readonly string[]>();
+  for (const source of deps.sources) {
+    if (keys.has(source.id)) continue;
+    // Empty keys would match (and redact) everything.
+    keys.set(source.id, [...new Set(await loadKeys(deps, source.id))].filter((key) => key !== ""));
+  }
+
   const controller = new AbortController();
   const follow = () => controller.abort(signal?.reason);
   if (signal?.aborted) follow();
@@ -71,23 +81,33 @@ export async function runAudit(deps: EngineDeps, options: RunAuditOptions): Prom
           const pair = `${source.id}|${inputId}`;
           if (handled.has(pair)) continue;
           handled.add(pair);
-          const ctx: SourceContext = { audit, http: deps.http, signal: controller.signal, key: deps.keys?.[source.id] ?? null };
-          if (source.keyRequirement === "required" && ctx.key === null) {
+          if (guard.isParked(source.id)) {
+            skipped.push({ sourceId: source.id, entityId: inputId, reason: "parked" });
+            continue;
+          }
+          const sourceKeys = keys.get(source.id) ?? [];
+          if (source.keyRequirement === "required" && sourceKeys.length === 0) {
             skipped.push({ sourceId: source.id, entityId: inputId, reason: "missing key" });
             continue;
           }
+          const ctx: SourceContext = {
+            audit,
+            http: guard.http(source, deps.http, controller.signal),
+            signal: controller.signal,
+            key: guard.nextKey(source.id, sourceKeys),
+          };
           let runnable = true;
           try {
             runnable = source.canRun ? source.canRun(input, ctx) : true;
           } catch (error) {
-            waveFindings.push(failed(source.id, audit.id, input, error));
+            waveFindings.push(failed(source.id, audit.id, input, error, sourceKeys));
             continue;
           }
           if (!runnable) {
             skipped.push({ sourceId: source.id, entityId: inputId, reason: "cannot run" });
             continue;
           }
-          jobs.push(runLookup(source, input, ctx, aborted, waveFindings));
+          jobs.push(runLookup(source, input, ctx, aborted, waveFindings, guard, sourceKeys));
         }
       }
       await Promise.all(jobs);
@@ -132,6 +152,8 @@ async function runLookup(
   ctx: SourceContext,
   aborted: Promise<"aborted">,
   out: Finding[],
+  guard: SourceGuard,
+  keys: readonly string[],
 ): Promise<void> {
   try {
     const iterator = source.run(input, ctx)[Symbol.asyncIterator]();
@@ -144,12 +166,18 @@ async function runLookup(
         Promise.resolve(iterator.return?.()).catch(() => {});
         return;
       }
-      if (next.done) return;
-      if (isTrusted(next.value, source.id, ctx.audit.id)) out.push(next.value);
+      if (next.done) {
+        guard.recordSuccess(source.id);
+        return;
+      }
+      if (!isTrusted(next.value, source.id, ctx.audit.id)) continue;
+      const clean = redactFinding(next.value, keys);
+      if (clean && isTrusted(clean, source.id, ctx.audit.id)) out.push(clean);
     }
   } catch (error) {
     if (ctx.signal.aborted) return;
-    out.push(failed(source.id, ctx.audit.id, input, error));
+    guard.recordFailure(source.id);
+    out.push(failed(source.id, ctx.audit.id, input, error, keys));
   }
 }
 
@@ -163,8 +191,36 @@ function isTrusted(value: unknown, sourceId: string, auditId: string): value is 
   }
 }
 
-function failed(sourceId: string, auditId: string, input: Entity, error: unknown): Finding {
-  const message = error instanceof Error ? error.message.trim() : "";
+async function loadKeys(deps: EngineDeps, sourceId: string): Promise<readonly string[]> {
+  try {
+    const listed = (await deps.keys?.list(sourceId)) ?? [];
+    return listed.filter((key): key is string => typeof key === "string");
+  } catch {
+    // An unreadable keychain counts as no keys; the source is then skipped or runs keyless.
+    return [];
+  }
+}
+
+const REDACTED = "[redacted]";
+
+function redact(text: string, keys: readonly string[]): string {
+  return keys.reduce((out, key) => out.split(key).join(REDACTED), text);
+}
+
+// Keys must never reach the store: scrub reason and url, and drop the finding if a key hides anywhere else.
+function redactFinding(finding: Finding, keys: readonly string[]): Finding | null {
+  if (keys.length === 0) return finding;
+  const clean: Finding = {
+    ...finding,
+    url: finding.url === null ? null : redact(finding.url, keys),
+    reason: finding.reason === null ? null : redact(finding.reason, keys),
+  };
+  const text = JSON.stringify(clean);
+  return keys.some((key) => text.includes(key)) ? null : clean;
+}
+
+function failed(sourceId: string, auditId: string, input: Entity, error: unknown, keys: readonly string[]): Finding {
+  const message = error instanceof Error ? redact(error.message.trim(), keys) : "";
   return {
     auditId,
     source: sourceId,

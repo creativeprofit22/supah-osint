@@ -9,6 +9,9 @@ export type Http = {
 
 export type KeyRequirement = "none" | "optional" | "required";
 
+// At most `requests` calls in any `perMs` window; fractional rates are rounded down to the safe side.
+export type RateLimit = { requests: number; perMs: number };
+
 export type SourceContext = {
   audit: Audit;
   http: Http;
@@ -21,6 +24,8 @@ export type Source = {
   id: string;
   accepts: readonly EntityType[];
   keyRequirement: KeyRequirement;
+  // Wins over the app-wide default limit.
+  rateLimit?: RateLimit;
   // Dry run: false means skip this input without doing any lookup.
   canRun?(input: Entity, ctx: SourceContext): boolean;
   run(input: Entity, ctx: SourceContext): AsyncIterable<Finding>;
