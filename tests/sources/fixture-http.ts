@@ -8,7 +8,7 @@ import {
   type EntityOf,
   type Finding,
 } from "../../packages/core/src/index.ts";
-import type { Http, Source } from "../../packages/engine/src/index.ts";
+import type { Http, HttpRequestOptions, Source } from "../../packages/engine/src/index.ts";
 import { dnsQueryUrl } from "../../packages/sources/dns/src/index.ts";
 
 const ROOT = join(import.meta.dir, "..", "..");
@@ -16,12 +16,19 @@ const ROOT = join(import.meta.dir, "..", "..");
 export type Route = string | { file: string; status: number };
 
 // Exact URL -> recorded file (repo-relative); an unknown URL throws so tests can never reach the network.
-export function fixtureHttp(routes: Readonly<Record<string, Route>>): Http & { calls: string[] } {
+export type RecordedRequest = { url: string; options: HttpRequestOptions | undefined };
+
+export function fixtureHttp(
+  routes: Readonly<Record<string, Route>>,
+): Http & { calls: string[]; requests: RecordedRequest[] } {
   const calls: string[] = [];
+  const requests: RecordedRequest[] = [];
   return {
     calls,
-    async get(url) {
+    requests,
+    async get(url, options) {
       calls.push(url);
+      requests.push({ url, options });
       const route = routes[url];
       if (route === undefined) throw new Error(`no fixture for ${url}`);
       const { file, status } = typeof route === "string" ? { file: route, status: 200 } : route;
@@ -57,6 +64,12 @@ export function domain(name: string): EntityOf<"Domain"> {
   return made.value;
 }
 
+export function email(address: string): EntityOf<"Email"> {
+  const made = createEntity(audit.id, "Email", { address });
+  if (!made.ok) throw new Error(made.error);
+  return made.value;
+}
+
 export function username(name: string): EntityOf<"Username"> {
   const made = createEntity(audit.id, "Username", { name });
   if (!made.ok) throw new Error(made.error);
@@ -64,9 +77,14 @@ export function username(name: string): EntityOf<"Username"> {
 }
 
 // Runs one source directly and checks every finding obeys the core Finding rules.
-export async function runSource(source: Source, input: Entity, http: Http): Promise<Finding[]> {
+export async function runSource(
+  source: Source,
+  input: Entity,
+  http: Http,
+  key: string | null = null,
+): Promise<Finding[]> {
   const findings: Finding[] = [];
-  const ctx = { audit, http, signal: new AbortController().signal, key: null };
+  const ctx = { audit, http, signal: new AbortController().signal, key };
   for await (const finding of source.run(input, ctx)) {
     const checked = createFinding(finding);
     if (!checked.ok) throw new Error(`invalid finding from ${source.id}: ${checked.error}`);
