@@ -1,0 +1,11 @@
+{
+  "name": "@supah-osint/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@supah-osint/core": "workspace:*",
+    "@supah-osint/engine": "workspace:*"
+  }
+}

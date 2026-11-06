@@ -1,0 +1,25 @@
+{
+  "name": "supah-osint",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "packages/sources/*",
+    "apps/*",
+    "features/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "oxlint --deny-warnings",
+    "test": "bun test",
+    "boundaries": "depcruise packages apps features --config .dependency-cruiser.cjs",
+    "check": "bun run typecheck && bun run lint && bun test && bun run boundaries"
+  },
+  "devDependencies": {
+    "@swc/core": "1.16.21",
+    "@types/bun": "1.4.4",
+    "dependency-cruiser": "18.7.2",
+    "oxlint": "1.91.0",
+    "typescript": "7.0.2"
+  }
+}
