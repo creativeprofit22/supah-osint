@@ -1,0 +1,109 @@
+{
+  "license": [
+    "Test list for supah-osint, written by hand."
+  ],
+  "sites": [
+    {
+      "name": "Alpha",
+      "uri_check": "https://alpha.example/users/{account}",
+      "uri_pretty": "https://alpha.example/@{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "cat": "social"
+    },
+    {
+      "name": "Beta",
+      "uri_check": "https://beta.example/{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 200,
+      "m_string": "User not found",
+      "cat": "social"
+    },
+    {
+      "name": "Gamma",
+      "uri_check": "https://gamma.example/api?user={account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "strip_bad_char": ".",
+      "cat": "coding"
+    },
+    {
+      "name": "Broken",
+      "uri_check": "https://broken.example/{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "cat": "social",
+      "valid": false
+    },
+    {
+      "name": "Poster",
+      "uri_check": "https://poster.example/api/lookup",
+      "post_body": "{\"user\":\"{account}\"}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "cat": "social"
+    },
+    {
+      "name": "Header",
+      "uri_check": "https://header.example/{account}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "cat": "social"
+    },
+    {
+      "name": "Adult",
+      "uri_check": "https://adult.example/{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 404,
+      "m_string": "",
+      "cat": "xx NSFW xx"
+    },
+    {
+      "name": "Jsonpost",
+      "uri_check": "https://jsonpost.example/api/check",
+      "uri_pretty": "https://jsonpost.example/u/{account}",
+      "post_body": "{\"username\":\"{account}\"}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "e_code": 200,
+      "e_string": "\"taken\":true",
+      "m_code": 200,
+      "m_string": "\"taken\":false",
+      "cat": "social"
+    },
+    {
+      "name": "Redirector",
+      "uri_check": "https://redirector.example/{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 302,
+      "m_string": "",
+      "cat": "social"
+    },
+    {
+      "name": "Samecode",
+      "uri_check": "https://samecode.example/{account}",
+      "e_code": 200,
+      "e_string": "profile-card",
+      "m_code": 200,
+      "m_string": "",
+      "cat": "social"
+    }
+  ]
+}

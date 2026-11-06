@@ -101,6 +101,14 @@
         "@supah-osint/engine": "workspace:*",
       },
     },
+    "packages/sources/username-sites": {
+      "name": "@supah-osint/source-username-sites",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
     "packages/storage": {
       "name": "@supah-osint/storage",
       "version": "0.0.0",
@@ -235,6 +243,8 @@
     "@supah-osint/source-dns": ["@supah-osint/source-dns@workspace:packages/sources/dns"],
 
     "@supah-osint/source-rdap": ["@supah-osint/source-rdap@workspace:packages/sources/rdap"],
+
+    "@supah-osint/source-username-sites": ["@supah-osint/source-username-sites@workspace:packages/sources/username-sites"],
 
     "@supah-osint/storage": ["@supah-osint/storage@workspace:packages/storage"],
 

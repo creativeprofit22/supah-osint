@@ -1,6 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createEntity, createFinding, type Audit, type EntityOf, type Finding } from "../../packages/core/src/index.ts";
+import {
+  createEntity,
+  createFinding,
+  type Audit,
+  type Entity,
+  type EntityOf,
+  type Finding,
+} from "../../packages/core/src/index.ts";
 import type { Http, Source } from "../../packages/engine/src/index.ts";
 import { dnsQueryUrl } from "../../packages/sources/dns/src/index.ts";
 
@@ -50,8 +57,14 @@ export function domain(name: string): EntityOf<"Domain"> {
   return made.value;
 }
 
+export function username(name: string): EntityOf<"Username"> {
+  const made = createEntity(audit.id, "Username", { name });
+  if (!made.ok) throw new Error(made.error);
+  return made.value;
+}
+
 // Runs one source directly and checks every finding obeys the core Finding rules.
-export async function runSource(source: Source, input: EntityOf<"Domain">, http: Http): Promise<Finding[]> {
+export async function runSource(source: Source, input: Entity, http: Http): Promise<Finding[]> {
   const findings: Finding[] = [];
   const ctx = { audit, http, signal: new AbortController().signal, key: null };
   for await (const finding of source.run(input, ctx)) {

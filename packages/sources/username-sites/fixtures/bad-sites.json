@@ -1,0 +1,10 @@
+{
+  "sites": [
+    "not an object",
+    { "name": "NoPlaceholder", "uri_check": "https://a.example/profile", "e_code": 200, "e_string": "x", "m_code": 404, "m_string": "" },
+    { "name": "StringCode", "uri_check": "https://b.example/{account}", "e_code": "200", "e_string": "x", "m_code": 404, "m_string": "" },
+    { "name": "Ftp", "uri_check": "ftp://c.example/{account}", "e_code": 200, "e_string": "x", "m_code": 404, "m_string": "" },
+    { "name": "Same", "uri_check": "https://d.example/{account}", "e_code": 200, "e_string": "", "m_code": 200, "m_string": "" },
+    { "name": "Good", "uri_check": "https://e.example/{account}", "e_code": 200, "e_string": "x", "m_code": 404, "m_string": "" }
+  ]
+}
