@@ -1,10 +1,12 @@
-import type {
-  AppClient,
-  DomainAuditReply,
-  EntityRow,
-  FindingRow,
-  PingReply,
-  SourceHealthRow,
+import {
+  type AppClient,
+  type DomainAuditReply,
+  type EntityRow,
+  type FindingRow,
+  KEYED_SOURCES,
+  type PingReply,
+  REGISTRATION_WARNING,
+  type SourceHealthRow,
 } from "@supah-osint/rpc/schema";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
@@ -46,6 +48,7 @@ export function App({ client }: { client: AppClient }) {
         {state.kind === "failed" && <span className="error">Ping failed: {state.error}</span>}
       </output>
       <DomainAuditPanel client={client} onAuditFinished={() => setHealthVersion((v) => v + 1)} />
+      <EmailAuditPanel client={client} onAuditFinished={() => setHealthVersion((v) => v + 1)} />
       <SourcesPanel client={client} healthVersion={healthVersion} />
     </main>
   );
@@ -114,6 +117,88 @@ function DomainAuditPanel({ client, onAuditFinished }: { client: AppClient; onAu
         {audit.kind === "running" && `Checking ${audit.domain}…`}
         {audit.kind === "done" && summary(audit.reply)}
         {audit.kind === "failed" && <span className="error">Domain audit failed: {audit.error}</span>}
+      </output>
+      {audit.kind === "done" && <AuditResults reply={audit.reply} />}
+    </section>
+  );
+}
+
+type EmailAuditState =
+  | { kind: "idle" }
+  | { kind: "running"; email: string }
+  | { kind: "done"; reply: DomainAuditReply }
+  | { kind: "failed"; error: string };
+
+function EmailAuditPanel({ client, onAuditFinished }: { client: AppClient; onAuditFinished: () => void }) {
+  const [subjectName, setSubjectName] = useState("");
+  const [email, setEmail] = useState("");
+  const [checkRegistrations, setCheckRegistrations] = useState(false);
+  const [audit, setAudit] = useState<EmailAuditState>({ kind: "idle" });
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const target = email.trim();
+    setAudit({ kind: "running", email: target });
+    try {
+      setAudit({ kind: "done", reply: await client.auditEmail(subjectName.trim(), target, checkRegistrations) });
+    } catch (error) {
+      setAudit({ kind: "failed", error: errorText(error) });
+    } finally {
+      onAuditFinished();
+    }
+  }
+
+  const blank = subjectName.trim() === "" || email.trim() === "";
+  return (
+    <section className="panel" aria-labelledby="email-audit-heading">
+      <h2 id="email-audit-heading">Email exposure</h2>
+      <p id="hibp-note">
+        The email is sent to Have I Been Pwned to look up known breaches. This needs your own Have I Been Pwned API key,
+        saved below under the source id <code>hibp</code>. Only breach names and dates are kept.
+      </p>
+      <form className="key-form" onSubmit={submit}>
+        <label>
+          Your name
+          <input
+            value={subjectName}
+            onChange={(event) => setSubjectName(event.target.value)}
+            required
+            autoComplete="name"
+          />
+        </label>
+        <label>
+          Email you own
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            placeholder="you@example.com"
+            autoComplete="email"
+            spellCheck={false}
+            aria-describedby="hibp-note"
+          />
+        </label>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={checkRegistrations}
+            onChange={(event) => setCheckRegistrations(event.target.checked)}
+            aria-describedby="registration-warning"
+          />
+          Also check which sites this email is signed up on
+        </label>
+        <p id="registration-warning" className="warning">
+          {REGISTRATION_WARNING}
+        </p>
+        <button type="submit" disabled={audit.kind === "running" || blank}>
+          Run email audit
+        </button>
+      </form>
+      <output className="result" aria-live="polite">
+        {audit.kind === "running" && `Checking ${audit.email}…`}
+        {audit.kind === "done" && summary(audit.reply)}
+        {audit.kind === "failed" && <span className="error">Email audit failed: {audit.error}</span>}
       </output>
       {audit.kind === "done" && <AuditResults reply={audit.reply} />}
     </section>
@@ -326,9 +411,14 @@ function KeyForm({
         />
       </label>
       <datalist id="known-sources">
-        {sourceIds.map((id) => (
-          <option key={id} value={id} />
+        {KEYED_SOURCES.map((source) => (
+          <option key={source.id} value={source.id} label={source.label} />
         ))}
+        {sourceIds
+          .filter((id) => !KEYED_SOURCES.some((source) => source.id === id))
+          .map((id) => (
+            <option key={id} value={id} />
+          ))}
       </datalist>
       <label>
         Keys, one per line

@@ -13,6 +13,7 @@ function fakeSources(rows: SourceHealthRow[] = []) {
     revived: [] as string[],
     saved: [] as { sourceId: string; keys: readonly string[] }[],
     audited: [] as { subjectName: string; domain: string }[],
+    emailed: [] as { subjectName: string; email: string; checkRegistrations: boolean }[],
   };
   const sources: SourceControls = {
     sourceHealth: () => rows,
@@ -24,6 +25,10 @@ function fakeSources(rows: SourceHealthRow[] = []) {
     },
   };
   const audits: DomainAudits = {
+    auditEmail: async (subjectName, email, { checkRegistrations }) => {
+      calls.emailed.push({ subjectName, email, checkRegistrations });
+      return { auditId: "a2", status: "done", findings: [], entities: [], relations: [], skipped: [] };
+    },
     auditDomain: async (subjectName, domain) => {
       calls.audited.push({ subjectName, domain });
       // Extra fields stand in for the full core types; they must not cross to the window.
@@ -158,4 +163,31 @@ test("bunHandlers rejects an empty subject name or domain", async () => {
     );
   }
   expect(calls.audited).toEqual([]);
+});
+
+test("auditEmail passes the opt-in through as given", async () => {
+  const { client, calls } = setup();
+  expect((await client.auditEmail("Ada", "ada@example.com", false)).auditId).toBe("a2");
+  await client.auditEmail("Ada", "ada@example.com", true);
+  expect(calls.emailed).toEqual([
+    { subjectName: "Ada", email: "ada@example.com", checkRegistrations: false },
+    { subjectName: "Ada", email: "ada@example.com", checkRegistrations: true },
+  ]);
+});
+
+test("bunHandlers only accepts a real true or false for checkRegistrations", async () => {
+  const { call, calls } = setup();
+  for (const checkRegistrations of [undefined, "true", 1, null, "yes"]) {
+    await expect(
+      Promise.resolve().then(() =>
+        call("auditEmail", { subjectName: "Ada", email: "ada@example.com", checkRegistrations }),
+      ),
+    ).rejects.toThrow("checkRegistrations must be true or false");
+  }
+  for (const params of [{ subjectName: "Ada", email: " ", checkRegistrations: false }, undefined]) {
+    await expect(Promise.resolve().then(() => call("auditEmail", params))).rejects.toThrow(
+      "must be a non-empty string",
+    );
+  }
+  expect(calls.emailed).toEqual([]);
 });

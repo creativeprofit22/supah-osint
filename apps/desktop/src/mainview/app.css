@@ -76,6 +76,17 @@ button:focus-visible {
   padding: 0.4rem;
 }
 
+.key-form label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warning {
+  margin: 0;
+  max-width: 60ch;
+}
+
 .secret {
   -webkit-text-security: disc;
 }

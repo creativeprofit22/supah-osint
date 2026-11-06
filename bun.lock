@@ -66,6 +66,8 @@
         "@supah-osint/keychain": "workspace:*",
         "@supah-osint/source-crtsh": "workspace:*",
         "@supah-osint/source-dns": "workspace:*",
+        "@supah-osint/source-email-signups": "workspace:*",
+        "@supah-osint/source-hibp": "workspace:*",
         "@supah-osint/source-rdap": "workspace:*",
         "@supah-osint/storage": "workspace:*",
       },
@@ -87,6 +89,22 @@
     },
     "packages/sources/dns": {
       "name": "@supah-osint/source-dns",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
+    "packages/sources/email-signups": {
+      "name": "@supah-osint/source-email-signups",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/core": "workspace:*",
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
+    "packages/sources/hibp": {
+      "name": "@supah-osint/source-hibp",
       "version": "0.0.0",
       "dependencies": {
         "@supah-osint/core": "workspace:*",
@@ -241,6 +259,10 @@
     "@supah-osint/source-crtsh": ["@supah-osint/source-crtsh@workspace:packages/sources/crtsh"],
 
     "@supah-osint/source-dns": ["@supah-osint/source-dns@workspace:packages/sources/dns"],
+
+    "@supah-osint/source-email-signups": ["@supah-osint/source-email-signups@workspace:packages/sources/email-signups"],
+
+    "@supah-osint/source-hibp": ["@supah-osint/source-hibp@workspace:packages/sources/hibp"],
 
     "@supah-osint/source-rdap": ["@supah-osint/source-rdap@workspace:packages/sources/rdap"],
 

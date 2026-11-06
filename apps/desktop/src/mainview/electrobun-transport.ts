@@ -14,7 +14,7 @@ export async function createElectrobunTransport(): Promise<RpcTransport> {
   Reflect.deleteProperty(window, "__electrobunRpcSocketPort");
   const { Electroview } = await import("electrobun/view");
 
-  // Short limit for quick calls; only auditDomain gets the long one, which the Bun side's deadline stays under.
+  // Short limit for quick calls; only audits get the long one, which the Bun side's deadline stays under.
   const rpc = Electroview.defineRPC<AppSchema>({ maxRequestTime: 10_000, handlers: { requests: {}, messages: {} } });
   const view = new Electroview({ rpc });
   console.info(`supah-osint RPC transport: ${view.hostSocket ? "websocket" : "native bridge"}`);
@@ -25,6 +25,7 @@ export async function createElectrobunTransport(): Promise<RpcTransport> {
     reviveSource: (params) => rpc.request.reviveSource(params),
     setSourceKeys: (params) => rpc.request.setSourceKeys(params),
     auditDomain: (params) => rpc.request.auditDomain(params, { maxRequestTime: AUDIT_REQUEST_LIMIT_MS }),
+    auditEmail: (params) => rpc.request.auditEmail(params, { maxRequestTime: AUDIT_REQUEST_LIMIT_MS }),
   };
   return { request: (name, params) => calls[name](params) };
 }

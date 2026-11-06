@@ -3,6 +3,17 @@
 // The window waits this long for an audit; the Bun side stops its audit before then so a reply always arrives.
 export const AUDIT_REQUEST_LIMIT_MS = 120_000;
 
+// Shown next to the opt-in box, always visible. Plain-language engineering guidance, not legal advice.
+export const REGISTRATION_WARNING =
+  "Off unless you tick it. To see whether this email has an account, the app asks a few sites through their " +
+  "sign-up, login or password-reset forms. A site may then send you a password-reset or security email, and some " +
+  "sites' terms don't allow this kind of check. Only use it on your own email.";
+
+// Sources that need the user's own API key, for the key form.
+export const KEYED_SOURCES: readonly { id: string; label: string }[] = [{ id: "hibp", label: "Have I Been Pwned" }];
+
+export type EmailAuditParams = { subjectName: string; email: string; checkRegistrations: boolean };
+
 export type PingParams = { sentAt: number };
 
 export type PingReply = {
@@ -55,6 +66,7 @@ export type AppSchema = {
       // Only the count comes back; key text never crosses back to the window.
       setSourceKeys: { params: { sourceId: string; keys: string[] }; response: { saved: number } };
       auditDomain: { params: { subjectName: string; domain: string }; response: DomainAuditReply };
+      auditEmail: { params: EmailAuditParams; response: DomainAuditReply };
     };
     messages: Record<never, never>;
   };
@@ -79,6 +91,7 @@ export type AppClient = {
   reviveSource(sourceId: string): Promise<{ revived: true }>;
   setSourceKeys(sourceId: string, keys: string[]): Promise<{ saved: number }>;
   auditDomain(subjectName: string, domain: string): Promise<DomainAuditReply>;
+  auditEmail(subjectName: string, email: string, checkRegistrations: boolean): Promise<DomainAuditReply>;
 };
 
 export function createAppClient(transport: RpcTransport, now: () => number = Date.now): AppClient {
@@ -88,6 +101,8 @@ export function createAppClient(transport: RpcTransport, now: () => number = Dat
     reviveSource: (sourceId) => transport.request("reviveSource", { sourceId }),
     setSourceKeys: (sourceId, keys) => transport.request("setSourceKeys", { sourceId, keys }),
     auditDomain: (subjectName, domain) => transport.request("auditDomain", { subjectName, domain }),
+    auditEmail: (subjectName, email, checkRegistrations) =>
+      transport.request("auditEmail", { subjectName, email, checkRegistrations }),
   };
 }
 
@@ -104,18 +119,29 @@ export type SourceControls = {
 
 // Structural too; extra fields on the app's rows are dropped before they reach the window.
 export type DomainAudits = {
-  auditDomain(
-    subjectName: string,
-    domain: string,
-  ): Promise<{
-    auditId: string;
-    status: AuditStatus;
-    findings: readonly FindingRow[];
-    entities: readonly EntityRow[];
-    relations: readonly RelationRow[];
-    skipped: readonly SkippedRow[];
-  }>;
+  auditDomain(subjectName: string, domain: string): Promise<AuditRun>;
+  auditEmail(subjectName: string, email: string, options: { checkRegistrations: boolean }): Promise<AuditRun>;
 };
+
+type AuditRun = {
+  auditId: string;
+  status: AuditStatus;
+  findings: readonly FindingRow[];
+  entities: readonly EntityRow[];
+  relations: readonly RelationRow[];
+  skipped: readonly SkippedRow[];
+};
+
+function auditReply(run: AuditRun): DomainAuditReply {
+  return {
+    auditId: run.auditId,
+    status: run.status,
+    findings: run.findings.map(({ source, url, result, reason }) => ({ source, url, result, reason })),
+    entities: run.entities.map(({ id, type, label }) => ({ id, type, label })),
+    relations: run.relations.map(({ from, label, to }) => ({ from, label, to })),
+    skipped: run.skipped.map(({ sourceId, reason }) => ({ sourceId, reason })),
+  };
+}
 
 export function bunHandlers(deps: {
   now(): number;
@@ -154,15 +180,15 @@ export function bunHandlers(deps: {
     auditDomain: async (params) => {
       const subjectName = nonEmptyString(params, "subjectName");
       const domain = nonEmptyString(params, "domain");
-      const run = await deps.audits.auditDomain(subjectName, domain);
-      return {
-        auditId: run.auditId,
-        status: run.status,
-        findings: run.findings.map(({ source, url, result, reason }) => ({ source, url, result, reason })),
-        entities: run.entities.map(({ id, type, label }) => ({ id, type, label })),
-        relations: run.relations.map(({ from, label, to }) => ({ from, label, to })),
-        skipped: run.skipped.map(({ sourceId, reason }) => ({ sourceId, reason })),
-      };
+      return auditReply(await deps.audits.auditDomain(subjectName, domain));
+    },
+    auditEmail: async (params) => {
+      const subjectName = nonEmptyString(params, "subjectName");
+      const email = nonEmptyString(params, "email");
+      const checkRegistrations = (params as { checkRegistrations?: unknown } | undefined)?.checkRegistrations;
+      // A real boolean only, so a missing or odd value can never switch the sign-up checks on.
+      if (typeof checkRegistrations !== "boolean") throw new TypeError("checkRegistrations must be true or false");
+      return auditReply(await deps.audits.auditEmail(subjectName, email, { checkRegistrations }));
     },
   };
 }

@@ -13,6 +13,8 @@
     "@supah-osint/keychain": "workspace:*",
     "@supah-osint/source-crtsh": "workspace:*",
     "@supah-osint/source-dns": "workspace:*",
+    "@supah-osint/source-email-signups": "workspace:*",
+    "@supah-osint/source-hibp": "workspace:*",
     "@supah-osint/source-rdap": "workspace:*",
     "@supah-osint/storage": "workspace:*"
   }
