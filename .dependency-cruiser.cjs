@@ -1,9 +1,9 @@
 // Onion rings: imports may only point inward. See docs/architecture.md.
 const CORE = "^packages/core/";
 const APPLICATION = "^packages/(engine|scheduler)/";
-const ADAPTERS = "^packages/(sources/[^/]+|storage|evidence|removal|rpc)/";
+const ADAPTERS = "^packages/(sources/[^/]+|storage|keychain|evidence|removal|rpc)/";
 const ENTRY = "^(apps/[^/]+|features/[^/]+|packages/(ui|graph-view|ui-tokens))/";
-const APP_INTERNALS = "^packages/(engine|scheduler|storage|sources|evidence|removal)/";
+const APP_INTERNALS = "^packages/(engine|scheduler|storage|keychain|sources|evidence|removal)/";
 
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {

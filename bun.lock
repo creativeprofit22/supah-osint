@@ -49,12 +49,20 @@
         "@supah-osint/ui-tokens": "workspace:*",
       },
     },
+    "packages/keychain": {
+      "name": "@supah-osint/keychain",
+      "version": "0.0.0",
+      "dependencies": {
+        "@supah-osint/engine": "workspace:*",
+      },
+    },
     "packages/rpc": {
       "name": "@supah-osint/rpc",
       "version": "0.0.0",
       "dependencies": {
         "@supah-osint/core": "workspace:*",
         "@supah-osint/engine": "workspace:*",
+        "@supah-osint/keychain": "workspace:*",
         "@supah-osint/storage": "workspace:*",
       },
     },
@@ -165,6 +173,8 @@
     "@supah-osint/engine": ["@supah-osint/engine@workspace:packages/engine"],
 
     "@supah-osint/graph-view": ["@supah-osint/graph-view@workspace:packages/graph-view"],
+
+    "@supah-osint/keychain": ["@supah-osint/keychain@workspace:packages/keychain"],
 
     "@supah-osint/rpc": ["@supah-osint/rpc@workspace:packages/rpc"],
 

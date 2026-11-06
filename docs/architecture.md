@@ -5,15 +5,15 @@ supah-osint is a Bun workspace split into four rings. Imports may only point **i
 | Ring | Paths | Role | May import |
 |---|---|---|---|
 | 1 domain | `packages/core` | Pure TypeScript: audits, typed entities with normalized keys, relations limited by an allowed-edge table, and findings (found / not found / inconclusive). No I/O. | Nothing outside itself. No `node:`/Bun builtins, no npm packages. |
-| 2 application | `packages/engine`, `packages/scheduler` | Use cases. Define the interfaces they need: `Source`, `Store`, `Http` (engine), `Clock` (scheduler). | Core and ring 2. No builtins: I/O goes through those interfaces. |
-| 3 adapters | `packages/sources/*`, `packages/storage`, `packages/evidence`, `packages/removal`, `packages/rpc` | Implement ring 2 interfaces; `rpc` is the one door into the app. | Rings 1–3. Never ring 4. |
-| 4 entry points | `apps/desktop`, `packages/ui`, `packages/graph-view`, `packages/ui-tokens`, `features/*` | Desktop app and UI. | Ring 4, `packages/rpc`, and `packages/core` for plain domain types. Never engine, scheduler, storage, sources, evidence or removal. |
+| 2 application | `packages/engine`, `packages/scheduler` | Use cases. Define the interfaces they need: `Source`, `Store`, `Http`, `KeySource`, `Clock` (engine), plus the scheduler's own `Clock`. | Core and ring 2. No builtins: I/O goes through those interfaces. |
+| 3 adapters | `packages/sources/*`, `packages/storage`, `packages/keychain`, `packages/evidence`, `packages/removal`, `packages/rpc` | Implement ring 2 interfaces; `keychain` keeps API keys in the OS keychain (`Bun.secrets`), never in the database; `rpc` is the one door into the app. | Rings 1–3. Never ring 4. |
+| 4 entry points | `apps/desktop`, `packages/ui`, `packages/graph-view`, `packages/ui-tokens`, `features/*` | Desktop app and UI. | Ring 4, `packages/rpc`, and `packages/core` for plain domain types. Never engine, scheduler, storage, keychain, sources, evidence or removal. |
 
 ```
 apps/desktop, ui, graph-view, ui-tokens, features/*   (4)
         │ only through rpc (+ core types)
         ▼
-rpc, storage, sources/*, evidence, removal             (3)
+rpc, storage, keychain, sources/*, evidence, removal   (3)
         │
         ▼
 engine, scheduler                                      (2)

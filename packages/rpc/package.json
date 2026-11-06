@@ -10,6 +10,7 @@
   "dependencies": {
     "@supah-osint/core": "workspace:*",
     "@supah-osint/engine": "workspace:*",
+    "@supah-osint/keychain": "workspace:*",
     "@supah-osint/storage": "workspace:*"
   }
 }
