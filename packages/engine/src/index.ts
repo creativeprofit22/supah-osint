@@ -1,5 +1,5 @@
 // Ring 2 (application): use cases. Talks to the outside only through the interfaces below.
-import { dedupeFindings, type Finding, type Subject, type SubjectId } from "@supah-osint/core";
+import { createFinding, dedupeFindings, type Audit, type AuditId, type Finding } from "@supah-osint/core";
 
 export type HttpResponse = { status: number; body: string };
 
@@ -9,12 +9,12 @@ export type Http = {
 
 export type Source = {
   name: string;
-  search(subject: Subject, http: Http): Promise<Finding[]>;
+  search(audit: Audit, http: Http): Promise<Finding[]>;
 };
 
 export type Store = {
   saveFindings(findings: readonly Finding[]): Promise<void>;
-  listFindings(subjectId: SubjectId): Promise<Finding[]>;
+  listFindings(auditId: AuditId): Promise<Finding[]>;
 };
 
 export type EngineDeps = {
@@ -23,13 +23,15 @@ export type EngineDeps = {
   http: Http;
 };
 
-export async function runSearch(deps: EngineDeps, subject: Subject): Promise<Finding[]> {
-  const results = await Promise.all(deps.sources.map((source) => source.search(subject, deps.http)));
-  const findings = dedupeFindings(results.flat());
+export async function runSearch(deps: EngineDeps, audit: Audit): Promise<Finding[]> {
+  const results = await Promise.all(deps.sources.map((source) => source.search(audit, deps.http)));
+  // Sources are untrusted: drop findings that break the Finding rules or belong to another audit.
+  const valid = results.flat().filter((finding) => finding.auditId === audit.id && createFinding(finding).ok);
+  const findings = dedupeFindings(valid);
   await deps.store.saveFindings(findings);
   return findings;
 }
 
-export function listFindings(deps: Pick<EngineDeps, "store">, subjectId: SubjectId): Promise<Finding[]> {
-  return deps.store.listFindings(subjectId);
+export function listFindings(deps: Pick<EngineDeps, "store">, auditId: AuditId): Promise<Finding[]> {
+  return deps.store.listFindings(auditId);
 }
