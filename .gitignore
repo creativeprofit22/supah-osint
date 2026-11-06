@@ -22,3 +22,8 @@ build/
 
 # Logs
 *.log
+
+# Electrobun (Hutch devkit and build output)
+.hutch/
+artifacts/
+.cottontail-tmp/

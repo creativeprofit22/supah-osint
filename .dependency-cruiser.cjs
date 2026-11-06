@@ -74,7 +74,8 @@ module.exports = {
     // TypeScript 7 has no JS compiler API, which the default "tsc" parser needs.
     parser: "swc",
     doNotFollow: { path: "node_modules" },
-    exclude: { path: "^tests/fixtures/" },
+    // .hutch holds the generated Electrobun devkit; dist/build/artifacts are build output.
+    exclude: { path: ["^tests/fixtures/", "/[.]hutch/", "^apps/[^/]+/(dist|build|artifacts)/"] },
     preserveSymlinks: false,
     enhancedResolveOptions: {
       exportsFields: ["exports"],

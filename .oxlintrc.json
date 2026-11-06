@@ -3,5 +3,15 @@
   "categories": {
     "correctness": "error"
   },
-  "ignorePatterns": ["tests/fixtures/**", "node_modules/**"]
+  "ignorePatterns": [
+    "tests/fixtures/**",
+    "node_modules/**",
+    "**/.hutch/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/artifacts/**"
+  ],
+  "rules": {
+    "typescript/no-explicit-any": "error"
+  }
 }

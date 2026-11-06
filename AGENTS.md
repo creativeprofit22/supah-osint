@@ -1,14 +1,18 @@
 # AGENTS.md
 
-Bun workspace (TypeScript 7) for supah-osint. Packages ship TypeScript source; there is no build step yet.
+Bun workspace (TypeScript 7) for supah-osint. Packages ship TypeScript source; `apps/desktop` builds into an Electrobun app.
 
 ## Commands
 - Install: `bun install` (CI uses `bun install --frozen-lockfile`)
-- Build: none yet; `bun run typecheck` is the compile check
+- Typecheck: `bun run typecheck` (the compile check for packages)
+- Dev: `bun run dev` (React view hot reload plus Electrobun window)
+- Run without Vite: `bun run --cwd apps/desktop start`
+- Build (desktop): `bun run --cwd apps/desktop build` (electrobun build, output in `apps/desktop/artifacts`)
+- Devkit: `apps/desktop` needs the Electrobun devkit in `apps/desktop/.hutch`, created by `bun run --cwd apps/desktop devkit` (`electrobun prepare`); dev, start, build and typecheck run it
 - Test: `bun test`
 - Lint: `bun run lint` (oxlint)
 - Boundaries: `bun run boundaries` (dependency-cruiser ring rules)
-- Everything CI runs: `bun run check`
+- CI: `bun run check` runs CI's check job; CI also builds Windows with `bun run --cwd apps/desktop build`
 
 ## Architecture
 Packages follow four onion rings and imports point inward only; see `docs/architecture.md`. Put new packages in the ring their path implies and declare workspace deps as `"workspace:*"`.

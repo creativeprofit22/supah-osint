@@ -4,9 +4,24 @@
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
+  "scripts": {
+    "devkit": "electrobun prepare",
+    "dev": "bun scripts/dev.ts",
+    "start": "bun run devkit && vite build && electrobun dev",
+    "build": "bun run devkit && vite build && electrobun build --env=stable"
+  },
   "dependencies": {
     "@supah-osint/core": "workspace:*",
     "@supah-osint/rpc": "workspace:*",
-    "@supah-osint/ui": "workspace:*"
+    "@supah-osint/ui": "workspace:*",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "electrobun": "2.0.5",
+    "vite": "8.3.5"
   }
 }

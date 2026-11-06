@@ -14,5 +14,16 @@
     "types": ["bun"]
   },
   "include": ["packages", "apps", "features", "tests"],
-  "exclude": ["node_modules", "**/node_modules", "tests/fixtures"]
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "**/.hutch",
+    "tests/fixtures",
+    "apps/desktop/src/bun",
+    "apps/desktop/src/mainview",
+    "apps/desktop/scripts",
+    "apps/desktop/*.config.ts",
+    "apps/desktop/dist",
+    "apps/desktop/build"
+  ]
 }

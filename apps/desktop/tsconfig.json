@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    // Copied from .hutch/devkit/tsconfig.json, which uses baseUrl (removed in TypeScript 7).
+    "paths": {
+      "electrobun": ["./.hutch/devkit/api/sdks/main/index.ts"],
+      "electrobun/bun": ["./.hutch/devkit/api/sdks/main/index.ts"],
+      "electrobun/view": ["./.hutch/devkit/api/browser/index.ts"]
+    }
+  },
+  "include": ["src", "scripts", "*.config.ts"],
+  "exclude": ["node_modules", ".hutch", "dist", "build", "artifacts", "src/index.ts"]
+}
