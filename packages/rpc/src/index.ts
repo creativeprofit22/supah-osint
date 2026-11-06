@@ -1,6 +1,6 @@
 // Ring 3 (adapter): the only door from entry points into the app.
 import type { Audit, AuditId, Finding } from "@supah-osint/core";
-import { listFindings, runSearch, type EngineDeps } from "@supah-osint/engine";
+import { listFindings, runAudit, type EngineDeps } from "@supah-osint/engine";
 import { openSqliteStore } from "@supah-osint/storage";
 
 export { defaultDatabasePath } from "@supah-osint/storage";
@@ -12,7 +12,7 @@ export type Rpc = {
 
 export function createRpc(deps: EngineDeps): Rpc {
   return {
-    search: (audit) => runSearch(deps, audit),
+    search: async (audit) => (await runAudit(deps, { audit })).findings,
     findings: (auditId) => listFindings(deps, auditId),
   };
 }

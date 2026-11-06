@@ -8,8 +8,8 @@ const app = openStoredRpc({
   databasePath: defaultDatabasePath(),
   sources: [],
   http: {
-    get: async (url) => {
-      const response = await fetch(url);
+    get: async (url, options) => {
+      const response = await fetch(url, { signal: options?.signal });
       return { status: response.status, body: await response.text() };
     },
   },
