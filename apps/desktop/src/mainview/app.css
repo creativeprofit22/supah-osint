@@ -88,3 +88,19 @@ button:focus-visible {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.badge.found {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.badge.inconclusive,
+.badge.skipped {
+  color: #b26a00;
+  font-style: italic;
+}
+
+.edges {
+  padding-left: 1.25rem;
+  overflow-wrap: anywhere;
+}

@@ -11,6 +11,9 @@
     "@supah-osint/core": "workspace:*",
     "@supah-osint/engine": "workspace:*",
     "@supah-osint/keychain": "workspace:*",
+    "@supah-osint/source-crtsh": "workspace:*",
+    "@supah-osint/source-dns": "workspace:*",
+    "@supah-osint/source-rdap": "workspace:*",
     "@supah-osint/storage": "workspace:*"
   }
 }

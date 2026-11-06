@@ -3,10 +3,9 @@ import { defaultDatabasePath, openStoredRpc } from "@supah-osint/rpc";
 import { bunHandlers, type AppSchema } from "@supah-osint/rpc/schema";
 import { BrowserView, BrowserWindow, Updater } from "electrobun/bun";
 
-// Opening the store runs any pending migrations before the window appears.
+// Opening the store runs any pending migrations before the window appears. Sources default to the domain checks.
 const app = openStoredRpc({
   databasePath: defaultDatabasePath(),
-  sources: [],
   http: {
     get: async (url, options) => {
       const response = await fetch(url, { signal: options?.signal });
@@ -33,7 +32,7 @@ async function getMainViewUrl(): Promise<string> {
 
 const rpc = BrowserView.defineRPC<AppSchema>({
   handlers: {
-    requests: bunHandlers({ now: Date.now, bunVersion: Bun.version, sources: app }),
+    requests: bunHandlers({ now: Date.now, bunVersion: Bun.version, sources: app, audits: app }),
     messages: {},
   },
 });

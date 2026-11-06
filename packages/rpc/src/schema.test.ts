@@ -1,8 +1,19 @@
 import { expect, test } from "bun:test";
-import { bunHandlers, createAppClient, type RpcTransport, type SourceControls, type SourceHealthRow } from "./schema.ts";
+import {
+  bunHandlers,
+  createAppClient,
+  type DomainAudits,
+  type RpcTransport,
+  type SourceControls,
+  type SourceHealthRow,
+} from "./schema.ts";
 
 function fakeSources(rows: SourceHealthRow[] = []) {
-  const calls = { revived: [] as string[], saved: [] as { sourceId: string; keys: readonly string[] }[] };
+  const calls = {
+    revived: [] as string[],
+    saved: [] as { sourceId: string; keys: readonly string[] }[],
+    audited: [] as { subjectName: string; domain: string }[],
+  };
   const sources: SourceControls = {
     sourceHealth: () => rows,
     reviveSource: (sourceId) => {
@@ -12,12 +23,23 @@ function fakeSources(rows: SourceHealthRow[] = []) {
       calls.saved.push({ sourceId, keys });
     },
   };
-  return { sources, calls };
+  const audits: DomainAudits = {
+    auditDomain: async (subjectName, domain) => {
+      calls.audited.push({ subjectName, domain });
+      // Extra fields stand in for the full core types; they must not cross to the window.
+      const finding = { source: "dns", url: "https://dns.google/x", result: "inconclusive", reason: "SERVFAIL", entities: [] } as const;
+      const entity = { id: "a1|Domain|example.org", type: "Domain", label: "example.org", props: { name: "example.org" } };
+      const relation = { from: "a1|Domain|mx.example.org", label: "subdomain_of", to: "a1|Domain|example.org", auditId: "a1" };
+      const skipped = { sourceId: "crtsh", reason: "parked", entityId: "a1|Domain|example.org" };
+      return { auditId: "a1", status: "cancelled", findings: [finding], entities: [entity], relations: [relation], skipped: [skipped] };
+    },
+  };
+  return { sources, audits, calls };
 }
 
 function setup(rows?: SourceHealthRow[]) {
-  const { sources, calls } = fakeSources(rows);
-  const handlers = bunHandlers({ now: () => 2000, bunVersion: "1.4.4", sources });
+  const { sources, audits, calls } = fakeSources(rows);
+  const handlers = bunHandlers({ now: () => 2000, bunVersion: "1.4.4", sources, audits });
   // Untyped call so tests can send what a misbehaving window might.
   const call = (name: string, params: unknown) => (handlers as Record<string, (p: unknown) => unknown>)[name]!(params);
   const transport: RpcTransport = {
@@ -82,4 +104,26 @@ test("bunHandlers rejects bad keys without echoing them", async () => {
     expect(error?.message).toBe("keys must be an array of strings");
   }
   expect(calls.saved).toEqual([]);
+});
+
+test("auditDomain round-trips plain rows only", async () => {
+  const { client, calls } = setup();
+  expect(await client.auditDomain("Ada", "example.org")).toEqual({
+    auditId: "a1",
+    status: "cancelled",
+    findings: [{ source: "dns", url: "https://dns.google/x", result: "inconclusive", reason: "SERVFAIL" }],
+    entities: [{ id: "a1|Domain|example.org", type: "Domain", label: "example.org" }],
+    relations: [{ from: "a1|Domain|mx.example.org", label: "subdomain_of", to: "a1|Domain|example.org" }],
+    skipped: [{ sourceId: "crtsh", reason: "parked" }],
+  });
+  expect(calls.audited).toEqual([{ subjectName: "Ada", domain: "example.org" }]);
+});
+
+test("bunHandlers rejects an empty subject name or domain", async () => {
+  const { call, calls } = setup();
+  const bad = [{ subjectName: "Ada" }, { subjectName: " ", domain: "example.org" }, { subjectName: "Ada", domain: 3 }, undefined];
+  for (const params of bad) {
+    await expect(Promise.resolve().then(() => call("auditDomain", params))).rejects.toThrow("must be a non-empty string");
+  }
+  expect(calls.audited).toEqual([]);
 });

@@ -9,6 +9,8 @@ supah-osint is a Bun workspace split into four rings. Imports may only point **i
 | 3 adapters | `packages/sources/*`, `packages/storage`, `packages/keychain`, `packages/evidence`, `packages/removal`, `packages/rpc` | Implement ring 2 interfaces; `keychain` keeps API keys in the OS keychain (`Bun.secrets`), never in the database; `rpc` is the one door into the app. | Rings 1–3. Never ring 4. |
 | 4 entry points | `apps/desktop`, `packages/ui`, `packages/graph-view`, `packages/ui-tokens`, `features/*` | Desktop app and UI. | Ring 4, `packages/rpc`, and `packages/core` for plain domain types. Never engine, scheduler, storage, keychain, sources, evidence or removal. |
 
+Each source is its own ring-3 package under `packages/sources/<id>` (for example `@supah-osint/source-dns`), with recorded responses in its `fixtures/` folder and tests in `tests/sources/<id>.test.ts`. `domainSources()` in `packages/rpc` lists the sources the app runs.
+
 ```
 apps/desktop, ui, graph-view, ui-tokens, features/*   (4)
         │ only through rpc (+ core types)
@@ -34,7 +36,7 @@ Encoded in [`.dependency-cruiser.cjs`](../.dependency-cruiser.cjs), all errors:
 - `only-storage-touches-sqlite`: only `packages/storage` imports `bun:sqlite` (or `node:sqlite`); everything else reaches the database through the engine's `Store`.
 - `no-circular`, `not-to-unresolvable`.
 
-Rules match path patterns, so packages that don't exist yet (`sources/*`, `evidence`, `removal`, `features/*`) are covered as soon as they're added. A workspace package can also only import what its `package.json` declares, because Bun links each package's own dependencies.
+Rules match path patterns, so packages that don't exist yet (`evidence`, `removal`, `features/*`) are covered as soon as they're added. A workspace package can also only import what its `package.json` declares, because Bun links each package's own dependencies.
 
 ## Enforcement
 

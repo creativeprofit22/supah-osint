@@ -1,4 +1,4 @@
-import type { AppClient, PingReply, SourceHealthRow } from "@supah-osint/rpc/schema";
+import type { AppClient, DomainAuditReply, EntityRow, FindingRow, PingReply, SourceHealthRow } from "@supah-osint/rpc/schema";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 type PingState =
@@ -9,6 +9,8 @@ type PingState =
 
 export function App({ client }: { client: AppClient }) {
   const [state, setState] = useState<PingState>({ kind: "idle" });
+  // Bumped after each audit, since audits change source failure counts and parking.
+  const [healthVersion, setHealthVersion] = useState(0);
 
   async function ping() {
     setState({ kind: "waiting" });
@@ -36,12 +38,154 @@ export function App({ client }: { client: AppClient }) {
         )}
         {state.kind === "failed" && <span className="error">Ping failed: {state.error}</span>}
       </output>
-      <SourcesPanel client={client} />
+      <DomainAuditPanel client={client} onAuditFinished={() => setHealthVersion((v) => v + 1)} />
+      <SourcesPanel client={client} healthVersion={healthVersion} />
     </main>
   );
 }
 
-function SourcesPanel({ client }: { client: AppClient }) {
+type AuditState =
+  | { kind: "idle" }
+  | { kind: "running"; domain: string }
+  | { kind: "done"; reply: DomainAuditReply }
+  | { kind: "failed"; error: string };
+
+const RESULT_TEXT: Record<FindingRow["result"], string> = {
+  found: "found",
+  not_found: "nothing found",
+  inconclusive: "inconclusive",
+};
+
+function DomainAuditPanel({ client, onAuditFinished }: { client: AppClient; onAuditFinished: () => void }) {
+  const [subjectName, setSubjectName] = useState("");
+  const [domain, setDomain] = useState("");
+  const [audit, setAudit] = useState<AuditState>({ kind: "idle" });
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const target = domain.trim();
+    setAudit({ kind: "running", domain: target });
+    try {
+      setAudit({ kind: "done", reply: await client.auditDomain(subjectName.trim(), target) });
+    } catch (error) {
+      setAudit({ kind: "failed", error: errorText(error) });
+    } finally {
+      onAuditFinished();
+    }
+  }
+
+  const blank = subjectName.trim() === "" || domain.trim() === "";
+  return (
+    <section className="panel" aria-labelledby="audit-heading">
+      <h2 id="audit-heading">Domain audit</h2>
+      <form className="key-form" onSubmit={submit}>
+        <label>
+          Your name
+          <input value={subjectName} onChange={(event) => setSubjectName(event.target.value)} required autoComplete="name" />
+        </label>
+        <label>
+          Domain you own
+          <input
+            value={domain}
+            onChange={(event) => setDomain(event.target.value)}
+            required
+            placeholder="example.com"
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </label>
+        <button type="submit" disabled={audit.kind === "running" || blank}>
+          Run domain audit
+        </button>
+      </form>
+      <output className="result" aria-live="polite">
+        {audit.kind === "running" && `Checking ${audit.domain}…`}
+        {audit.kind === "done" && summary(audit.reply)}
+        {audit.kind === "failed" && <span className="error">Domain audit failed: {audit.error}</span>}
+      </output>
+      {audit.kind === "done" && <AuditResults reply={audit.reply} />}
+    </section>
+  );
+}
+
+function summary(reply: DomainAuditReply): string {
+  // Skipped lookups never ran, so they count as not checked.
+  const unsure = reply.findings.filter((finding) => finding.result === "inconclusive").length + reply.skipped.length;
+  const base = `${reply.findings.length + reply.skipped.length} checks, ${reply.entities.length} entities, ${reply.relations.length} links.`;
+  const checked = unsure === 0 ? base : `${base} ${unsure} could not be checked.`;
+  if (reply.status !== "cancelled") return checked;
+  // Lookups cut off by the deadline leave no row, so a missing source means not checked, not nothing found.
+  return `Audit stopped at the time limit, so these results are partial. ${checked} Lookups still running were dropped and are not listed; a missing source was not checked.`;
+}
+
+function AuditResults({ reply }: { reply: DomainAuditReply }) {
+  const labels = new Map(reply.entities.map((entity) => [entity.id, entity.label]));
+  const byType = new Map<string, EntityRow[]>();
+  for (const entity of reply.entities) byType.set(entity.type, [...(byType.get(entity.type) ?? []), entity]);
+
+  return (
+    <>
+      <h3>Checks</h3>
+      <table className="health">
+        <thead>
+          <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Result</th>
+            <th scope="col">Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {reply.findings.map((finding, index) => (
+            <tr key={`${finding.source}-${finding.url ?? ""}-${index}`}>
+              <td title={finding.url ?? undefined}>{finding.source}</td>
+              <td>
+                <span className={`badge ${finding.result}`}>{RESULT_TEXT[finding.result]}</span>
+              </td>
+              <td>{finding.reason ?? "—"}</td>
+            </tr>
+          ))}
+          {reply.skipped.map((row, index) => (
+            <tr key={`skipped-${row.sourceId}-${index}`}>
+              <td>{row.sourceId}</td>
+              <td>
+                <span className="badge skipped">skipped</span>
+              </td>
+              <td>{row.reason}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <h3>Entities</h3>
+      {reply.entities.length === 0 && <p>No entities.</p>}
+      {[...byType].map(([type, entities]) => (
+        <section key={type} aria-label={type}>
+          <h4>
+            {type} ({entities.length})
+          </h4>
+          <ul>
+            {entities.map((entity) => (
+              <li key={entity.id}>{entity.label}</li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <h3>Links</h3>
+      {reply.relations.length === 0 ? (
+        <p>No links.</p>
+      ) : (
+        <ul className="edges">
+          {reply.relations.map((relation) => (
+            <li key={`${relation.from}-${relation.label}-${relation.to}`}>
+              {labels.get(relation.from) ?? relation.from} — {relation.label.replaceAll("_", " ")} → {labels.get(relation.to) ?? relation.to}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+function SourcesPanel({ client, healthVersion }: { client: AppClient; healthVersion: number }) {
   const [rows, setRows] = useState<SourceHealthRow[] | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
   const [reviving, setReviving] = useState<string | null>(null);
@@ -57,7 +201,7 @@ function SourcesPanel({ client }: { client: AppClient }) {
 
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+  }, [refresh, healthVersion]);
 
   async function revive(sourceId: string) {
     setReviving(sourceId);
