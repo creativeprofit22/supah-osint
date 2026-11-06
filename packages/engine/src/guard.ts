@@ -1,6 +1,6 @@
 // Ring 2 (application): rate limits, timeouts, retries, parking and key rotation shared by every source call.
 import type { Clock } from "./clock.ts";
-import type { Http, HttpResponse, RateLimit, Source } from "./source.ts";
+import type { Http, HttpRequestOptions, HttpResponse, RateLimit, Source } from "./source.ts";
 
 export class TimeoutError extends Error {
   override name = "TimeoutError";
@@ -73,14 +73,19 @@ export function createSourceGuard(options: SourceGuardOptions): SourceGuard {
     return limiter;
   };
 
-  async function attempt(base: Http, url: string, outer: AbortSignal): Promise<HttpResponse> {
+  async function attempt(
+    base: Http,
+    url: string,
+    options: HttpRequestOptions,
+    outer: AbortSignal,
+  ): Promise<HttpResponse> {
     const request = new AbortController();
     const stopTimer = new AbortController();
     const forward = () => request.abort(outer.reason);
     if (outer.aborted) forward();
     else outer.addEventListener("abort", forward, { once: true });
     try {
-      const response = base.get(url, { signal: request.signal });
+      const response = base.get(url, { ...options, signal: request.signal });
       response.catch(() => {});
       const timedOut = clock.sleep(timeoutMs, stopTimer.signal).then(
         () => "timeout" as const,
@@ -109,7 +114,7 @@ export function createSourceGuard(options: SourceGuardOptions): SourceGuard {
           await limiterFor(source).acquire(outer);
           let reason: string;
           try {
-            const response = await attempt(base, url, outer);
+            const response = await attempt(base, url, callOptions ?? {}, outer);
             if (!isRetryableStatus(response.status)) return response;
             reason = `HTTP ${response.status}`;
           } catch (error) {

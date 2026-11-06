@@ -4,6 +4,7 @@ import {
   RetryExhaustedError,
   SourceParkedError,
   type Http,
+  type HttpRequestOptions,
   type HttpResponse,
   type Source,
 } from "../../packages/engine/src/index.ts";
@@ -17,10 +18,10 @@ function source(id: string, extra: Partial<Source> = {}): Source {
 
 // Answers with each step in turn (the last repeats): a status, an Error to throw, or "hang" (waits until aborted).
 function scripted(clock: FakeClock, steps: readonly (number | Error | "hang")[]) {
-  const calls: { url: string; at: number }[] = [];
+  const calls: { url: string; at: number; options?: HttpRequestOptions }[] = [];
   const http: Http = {
     get: (url, options) => {
-      calls.push({ url, at: clock.now() });
+      calls.push({ url, at: clock.now(), ...(options ? { options } : {}) });
       const step = steps[Math.min(calls.length, steps.length) - 1] ?? 200;
       if (step === "hang") {
         return new Promise<HttpResponse>((_, reject) => {
@@ -204,4 +205,19 @@ test("a fractional source limit above one rounds down so it never allows more ca
   await wrapped.get("https://a.test/1");
   await wrapped.get("https://a.test/2");
   expect(base.calls.map((call) => call.at)).toEqual([0, 1000]);
+});
+
+test("passes the method, headers, body and redirect choice through to the real request", async () => {
+  const clock = createFakeClock();
+  const base = scripted(clock, [200]);
+  const wrapped = createSourceGuard({ clock }).http(source("post"), base.http, new AbortController().signal);
+  const options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+    redirect: "manual",
+  } as const;
+  await wrapped.get("https://a.test/check", options);
+  expect(base.calls[0]?.options).toMatchObject(options);
+  expect(base.calls[0]?.options?.signal).toBeInstanceOf(AbortSignal);
 });

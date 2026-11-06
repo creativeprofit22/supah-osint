@@ -3,8 +3,19 @@ import type { Audit, Entity, EntityType, Finding } from "@supah-osint/core";
 
 export type HttpResponse = { status: number; body: string };
 
+export type HttpRequestOptions = {
+  signal?: AbortSignal;
+  // Defaults to GET; POST sends `body`.
+  method?: "GET" | "POST";
+  headers?: Readonly<Record<string, string>>;
+  body?: string;
+  // "manual" hands back a 3xx answer as-is instead of following it (default "follow").
+  redirect?: "follow" | "manual";
+};
+
 export type Http = {
-  get(url: string, options?: { signal?: AbortSignal }): Promise<HttpResponse>;
+  // Named for the common case; `options.method` can make it a POST.
+  get(url: string, options?: HttpRequestOptions): Promise<HttpResponse>;
 };
 
 export type KeyRequirement = "none" | "optional" | "required";
