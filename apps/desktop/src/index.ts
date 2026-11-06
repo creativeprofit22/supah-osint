@@ -1,10 +1,11 @@
 // Ring 4 (entry point): desktop shell. Talks to the app only through @supah-osint/rpc.
 import type { Audit } from "@supah-osint/core";
-import { createLocalRpc, type Rpc } from "@supah-osint/rpc";
+import { defaultDatabasePath, openStoredRpc, type Rpc } from "@supah-osint/rpc";
 import { badgeStyle } from "@supah-osint/ui";
 
-export function startDesktop(): Rpc {
-  return createLocalRpc({ sources: [], http: { get: async () => ({ status: 501, body: "" }) } });
+// Saves to SQLite like the Bun main process; call close() when done.
+export function startDesktop(databasePath: string = defaultDatabasePath()): Rpc & { close(): void } {
+  return openStoredRpc({ databasePath, sources: [], http: { get: async () => ({ status: 501, body: "" }) } });
 }
 
 export async function findingCountBadge(rpc: Rpc, audit: Audit): Promise<{ text: string; color: string }> {

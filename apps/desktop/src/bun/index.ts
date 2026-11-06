@@ -1,6 +1,20 @@
 // Bun main process. The only place, with the view's transport, that touches Electrobun.
+import { defaultDatabasePath, openStoredRpc } from "@supah-osint/rpc";
 import { bunHandlers, type AppSchema } from "@supah-osint/rpc/schema";
 import { BrowserView, BrowserWindow, Updater } from "electrobun/bun";
+
+// Opening the store runs any pending migrations before the window appears.
+const app = openStoredRpc({
+  databasePath: defaultDatabasePath(),
+  sources: [],
+  http: {
+    get: async (url) => {
+      const response = await fetch(url);
+      return { status: response.status, body: await response.text() };
+    },
+  },
+});
+process.on("exit", () => app.close());
 
 const DEV_SERVER_URL = "http://127.0.0.1:5173";
 const BUNDLED_VIEW_URL = "views://mainview/index.html";
