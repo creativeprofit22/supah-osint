@@ -1,15 +1,24 @@
 # AGENTS.md
 
-Static site with no build tooling yet (no package manifest).
+Bun workspace (TypeScript 7) for supah-osint. Packages ship TypeScript source; there is no build step yet.
 
 ## Commands
-- Install: none
-- Build: none
-- Test: none
-- Lint: none
+- Install: `bun install` (CI uses `bun install --frozen-lockfile`)
+- Build: none yet; `bun run typecheck` is the compile check
+- Test: `bun test`
+- Lint: `bun run lint` (oxlint)
+- Boundaries: `bun run boundaries` (dependency-cruiser ring rules)
+- Everything CI runs: `bun run check`
 
-When tooling is added (e.g. a `package.json`), list its real commands here and add them to CI.
+## Architecture
+Packages follow four onion rings and imports point inward only; see `docs/architecture.md`. Put new packages in the ring their path implies and declare workspace deps as `"workspace:*"`.
 
 ## Rules
 - CI lives in `.github/workflows/ci.yml` and must stay green.
 - Never commit with `--no-verify`.
+- Never "fix" the imports in `tests/fixtures/bad-tree`; they are deliberately broken.
+
+## Platform CLIs
+
+Installed and yours to run — use them directly; never send the user to a dashboard for something these answer:
+- `gh` — PRs, issues, CI run logs, releases. Auth failure → ask the user to run `gh auth login`, then retry.

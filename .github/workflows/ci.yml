@@ -19,6 +19,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      # Static site with no manifest yet: no install, build or test commands exist.
-      - name: Build
-        run: echo "No build or test scripts defined; add them here when tooling is introduced."
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Type-check
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Test
+        run: bun test
+      - name: Boundaries
+        run: bun run boundaries
