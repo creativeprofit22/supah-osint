@@ -33,7 +33,7 @@ async function getMainViewUrl(): Promise<string> {
 
 const rpc = BrowserView.defineRPC<AppSchema>({
   handlers: {
-    requests: bunHandlers({ now: Date.now, bunVersion: Bun.version }),
+    requests: bunHandlers({ now: Date.now, bunVersion: Bun.version, sources: app }),
     messages: {},
   },
 });

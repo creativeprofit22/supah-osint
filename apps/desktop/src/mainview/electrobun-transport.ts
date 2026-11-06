@@ -13,6 +13,9 @@ export async function createElectrobunTransport(): Promise<RpcTransport> {
   // Electrobun's conditional request types don't narrow for a generic name, so map each request once.
   const calls: { [K in RequestName]: (params: ParamsOf<K>) => Promise<ResponseOf<K>> } = {
     ping: (params) => rpc.request.ping(params),
+    sourceHealth: (params) => rpc.request.sourceHealth(params),
+    reviveSource: (params) => rpc.request.reviveSource(params),
+    setSourceKeys: (params) => rpc.request.setSourceKeys(params),
   };
   return { request: (name, params) => calls[name](params) };
 }

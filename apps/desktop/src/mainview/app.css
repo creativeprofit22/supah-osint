@@ -37,3 +37,54 @@ button:focus-visible {
 .error {
   color: #c62828;
 }
+
+.panel {
+  margin-top: 2.5rem;
+}
+
+.health {
+  border-collapse: collapse;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.health th,
+.health td {
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.badge.parked {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.key-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.key-form label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.key-form input,
+.key-form textarea {
+  font: inherit;
+  padding: 0.4rem;
+}
+
+.secret {
+  -webkit-text-security: disc;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
